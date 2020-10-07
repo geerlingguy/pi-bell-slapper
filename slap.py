@@ -18,11 +18,11 @@ try:
 
   # Slap the bell.
   sleep(0.4)
-  p.ChangeDutyCycle(6)
-  sleep(0.4)
   p.ChangeDutyCycle(12)
+  sleep(0.4)
+  p.ChangeDutyCycle(9)
   sleep(0.25)
-  p.ChangeDutyCycle(6)
+  p.ChangeDutyCycle(12)
   sleep(0.4)
 
 except KeyboardInterrupt:
