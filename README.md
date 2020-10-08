@@ -24,14 +24,14 @@ I'm currently slapping a boring old call bell. [This call bell](https://amzn.to/
 
 Well now, here's where it gets interesting. I thought I'd share all the code and tell you how it's done. That's why you're reading this, isn't it?
 
-  1. Clone this repository to your Pi.
+  1. Clone this repository to your Pi: `git clone https://github.com/geerlingguy/pi-bell-slapper.git`
   1. Plug in the following wires on the servo motor:
 
      1. Red wire to 5V power (pin 4)
      1. Brown wire to ground (pin 6)
      1. Orange wire to GPIO 21 (pin 40)
 
-  1. Run the command `./bell_slap.py` in this directory.
+  1. Change into this directory (`cd pi-bell-slapper`) and run the command `./bell_slap.py`.
   1. Wait a second, and you'll see the motor spin, then reverse back to its original position.
 
 > Note: The servo's wires come preinstalled into a 3-pin dupont female connector. You can use a tiny thing to pry up the release on the orange pin barrel connector, and slide that out. Then slide it into a separate 1-pin dupont female connector, and voila! You can then plug that orange wire directly into pin 40.

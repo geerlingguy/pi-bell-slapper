@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # The bell slapper script.
 # Adapted from: https://gist.github.com/meub/c3833921a3a45a3ec392d9962313b68e
@@ -37,7 +37,7 @@ def slap_the_bell():
         print("User stopped script during execution.")
 
     except NameError:
-        print("GPIO not defined. Ignoring bell slap.")
+        print("GPIO not defined. Ignoring bell slap.\n")
 
     finally:
         try:
