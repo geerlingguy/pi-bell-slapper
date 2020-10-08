@@ -3,6 +3,7 @@
 # The email checker script.
 
 import yaml
+import logging
 import email
 import bell_slap
 from imapclient import IMAPClient
@@ -20,11 +21,11 @@ server.login(config['email']['username'], config['email']['password'])
 
 # See how many messages are in the inbox.
 select_info = server.select_folder('INBOX')
-print('Messages in INBOX: %d' % select_info[b'EXISTS'])
+logging.info('Messages in INBOX: %d' % select_info[b'EXISTS'])
 
 # See if there are any new messages.
 messages = server.search('UNSEEN')
-print("Unread messages: %d\n" % len(messages))
+logging.info("Unread messages: %d\n" % len(messages))
 
 from_contains = config['conditions']['from_contains']
 subject_contains = config['conditions']['subject_contains']

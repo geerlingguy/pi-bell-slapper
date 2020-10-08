@@ -25,6 +25,7 @@ I'm currently slapping a boring old call bell. [This call bell](https://amzn.to/
 Well now, here's where it gets interesting. I thought I'd share all the code and tell you how it's done. That's why you're reading this, isn't it?
 
   1. Clone this repository to your Pi: `git clone https://github.com/geerlingguy/pi-bell-slapper.git`
+  1. Run `python3 -m pip install RPi.GPIO` to install required dependencies.
   1. Plug in the following wires on the servo motor:
 
      1. Red wire to 5V power (pin 4)
@@ -53,9 +54,11 @@ I built this project to monitor an email inbox. So I wrote a Python script, `ema
 To make this script work, you need to do two things on the Pi:
 
   1. Copy the `config.example.yml` file to a file named `config.yml`, and modify it with the email credentials for the account to be monitored.
-  2. Run `pip install imapclient` to install the [IMAPClient Python library](https://imapclient.readthedocs.io/en/2.1.0/).
+  2. Run `python3 -m pip install imapclient pyyaml` to install required dependencies.
 
 Then run `./email-check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
+
+> You might also need to install Pip, if you get an error on the `python3 -m pip` command. To do that, run `sudo apt install -y python3-pip`.
 
 ## Were you inspired by anyone?
 
