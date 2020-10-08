@@ -1,0 +1,11 @@
+# IMAP Email account connection details.
+email:
+  username: your_username
+  password: your_password
+  imap_host: imap.gmail.com
+  imap_port: 993
+
+# Conditions to match for unread messages.
+conditions:
+  from_contains: 'person@example.com'
+  subject_contains: 'Thank you for your support!'

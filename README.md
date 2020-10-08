@@ -40,6 +40,21 @@ Well... it's a little more complicated because to slap a real bell, you have to 
 
 I'll try to detail the whole process later, after I figure it out myself ;).
 
+## How do I tie an email inbox to the bell slapper?
+
+Well, now we're getting to the meat of it.
+
+It's easy enough to slap a bell with your hand; there's no point in making a Raspberry Pi do it if you just want to slap the bell once or twice.
+
+I built this project to monitor an email inbox. So I wrote a Python script, `email-check.py`. That python script does all the magic of translating "new email arrives" into "the bell has been resoundingly slapped".
+
+To make this script work, you need to do two things on the Pi:
+
+  1. Copy the `config.example.yml` file to a file named `config.yml`, and modify it with the email credentials for the account to be monitored.
+  2. Run `pip install imapclient` to install the [IMAPClient Python library](https://imapclient.readthedocs.io/en/2.1.0/).
+
+Then run `./email-check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
+
 ## Were you inspired by anyone?
 
 Of course I was inspired. You don't think I came up with all this on my own, did you? Alex Meub's [Office Bell Ringer](https://alexmeub.com/office-bell-ringer/) was my inspiration. Go read that post if you want to discover how I was inspired.
