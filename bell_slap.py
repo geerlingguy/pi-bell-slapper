@@ -11,6 +11,7 @@ try:
 except ModuleNotFoundError:
     print("RPi module not found. Ignoring bell slaps.\n")
 
+
 # Slap the bell.
 def slap_the_bell():
     try:
@@ -44,6 +45,7 @@ def slap_the_bell():
 
         except NameError:
             pass
+
 
 if __name__ == '__main__':
     # This script is being executed directly. Slap the bell right away!
