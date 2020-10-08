@@ -2,6 +2,7 @@
 
 # The email checker script.
 
+import os
 import yaml
 import logging
 import email
