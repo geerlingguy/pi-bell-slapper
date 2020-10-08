@@ -1,5 +1,7 @@
 # Raspberry Pi Bell Slapper
 
+[![CI](https://github.com/geerlingguy/pi-bell-slapper/workflows/CI/badge.svg)](https://github.com/geerlingguy/pi-bell-slapper/actions?query=workflow%3ACI)
+
 (Insert really amazing picture of the horrific contraption I build at some later time.)
 
 Why? I need a Raspberry Pi to slap a bell in response to a particular trigger.
