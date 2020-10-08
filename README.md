@@ -60,6 +60,22 @@ Then run `./email-check.py`, and prepare to be amazed! Or not, especially if it 
 
 > You might also need to install Pip, if you get an error on the `python3 -m pip` command. To do that, run `sudo apt install -y python3-pip`.
 
+### How do I continuously check the email inbox?
+
+Well now we're really getting somewhere useful!
+
+For now, I'm just using cron. Fire up the ol' crontab editor (`crontab -l`) and add the following line:
+
+```
+* * * * * /home/pi/pi-bell-slapper/email_check.py
+```
+
+Then every minute the script will run!
+
+> Note: If you have any errors, cron will email them to localhost (make sure you have something like `postfix` and `mailutils` installed to catch and read those emails). Other cron output goes into the syslog (check `/var/log/syslog`).
+
+For my own Pi model A+, the WiFi chipset I used went to sleep after a minute, causing lookups to fail. So I had to [follow my own directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi), and it worked a lot better.
+
 ## Were you inspired by anyone?
 
 Of course I was inspired. You don't think I came up with all this on my own, did you? Alex Meub's [Office Bell Ringer](https://alexmeub.com/office-bell-ringer/) was my inspiration. Go read that post if you want to discover how I was inspired.

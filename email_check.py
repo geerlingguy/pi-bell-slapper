@@ -8,8 +8,12 @@ import email
 import bell_slap
 from imapclient import IMAPClient
 
+# Store where we currently are in the filesystem.
+__location__ = os.path.realpath(
+    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
 # Attempt to read in the configuration.
-with open("config.yml", 'r') as stream:
+with open(os.path.join(__location__, "config.yml", 'r')) as stream:
     try:
         config = yaml.load(stream, Loader=yaml.FullLoader)
     except yaml.YAMLError as exc:
