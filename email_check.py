@@ -4,6 +4,7 @@
 
 import yaml
 import email
+import bell_slap
 from imapclient import IMAPClient
 
 # Attempt to read in the configuration.
@@ -37,6 +38,6 @@ for msgid, message_data in server.fetch(messages, ['RFC822']).items():
     # Check if the email from address and subject match our conditions.
     if from_contains in email_from and subject_contains in email_subject:
         print("Found matching email: %s\n" % email_subject)
-        # TODO: Hit that bell!
+        bell_slap.slap_the_bell()
 
 server.logout()

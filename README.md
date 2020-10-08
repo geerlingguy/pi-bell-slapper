@@ -29,14 +29,14 @@ Well now, here's where it gets interesting. I thought I'd share all the code and
      1. Brown wire to ground (pin 6)
      1. Orange wire to GPIO 21 (pin 40)
 
-  1. Run the command `./bell-slap.py` in this directory.
+  1. Run the command `./bell_slap.py` in this directory.
   1. Wait a second, and you'll see the motor spin, then reverse back to its original position.
 
 > Note: The servo's wires come preinstalled into a 3-pin dupont female connector. You can use a tiny thing to pry up the release on the orange pin barrel connector, and slide that out. Then slide it into a separate 1-pin dupont female connector, and voila! You can then plug that orange wire directly into pin 40.
 
 ### But how do I really slap a bell?
 
-Well... it's a little more complicated because to slap a real bell, you have to mount the servo motor to something solid, build a little armature to actually hit the bell, mount the bell so it doesn't move when it's slapped, and then power the Pi and build something on it that automatically runs the `./bell-slap.py` script.
+Well... it's a little more complicated because to slap a real bell, you have to mount the servo motor to something solid, build a little armature to actually hit the bell, mount the bell so it doesn't move when it's slapped, and then power the Pi and build something on it that automatically runs the `./bell_slap.py` script.
 
 I'll try to detail the whole process later, after I figure it out myself ;).
 
