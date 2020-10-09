@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/geerlingguy/pi-bell-slapper/workflows/CI/badge.svg)](https://github.com/geerlingguy/pi-bell-slapper/actions?query=workflow%3ACI)
 
-(Insert really amazing picture of the horrific contraption I build at some later time.)
+<img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark 1" />
 
 Why? I need a Raspberry Pi to slap a bell in response to a particular trigger.
 
@@ -26,7 +26,7 @@ Well now, here's where it gets interesting. I thought I'd share all the code and
 
   1. Clone this repository to your Pi: `git clone https://github.com/geerlingguy/pi-bell-slapper.git`
   1. Run `python3 -m pip install RPi.GPIO` to install required dependencies.
-  1. Plug in the following wires on the servo motor:
+  1. Plug in the following wires on the servo motor (see illustration below):
 
      1. Red wire to 5V power (pin 4)
      1. Brown wire to ground (pin 6)
@@ -34,6 +34,10 @@ Well now, here's where it gets interesting. I thought I'd share all the code and
 
   1. Change into this directory (`cd pi-bell-slapper`) and run the command `./bell_slap.py`.
   1. Wait a second, and you'll see the motor spin, then reverse back to its original position.
+
+Here's an illustration of the servo connections:
+
+<img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/servo-raspberry-pi-connections.jpeg" width="600" height="401" alt="Servo motor Pi connections" />
 
 > Note: The servo's wires come preinstalled into a 3-pin dupont female connector. You can use a tiny thing to pry up the release on the orange pin barrel connector, and slide that out. Then slide it into a separate 1-pin dupont female connector, and voila! You can then plug that orange wire directly into pin 40.
 
