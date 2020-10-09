@@ -28,7 +28,7 @@ def slap_the_bell():
         sleep(0.4)
         p.ChangeDutyCycle(12)
         sleep(0.4)
-        p.ChangeDutyCycle(9)
+        p.ChangeDutyCycle(11)
         sleep(0.25)
         p.ChangeDutyCycle(12)
         sleep(0.4)
