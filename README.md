@@ -12,9 +12,15 @@ In my case, it's for a radiothon. When a nonprofit community radio station gets 
 
 Something is better than nothing, so I made this project, which slaps a bell upon a triggering condition.
 
+## Is there a video of the build process?
+
+Why, yes! How did you know?
+
+Watch this video for more on the build: [The Raspberry Pi Bell Slapper - a software-controlled bell](https://www.youtube.com/watch?v=Etr7uIL9spg).
+
 ## How is the bell slapped?
 
-I'm glad you asked.
+I thought you'd never ask!
 
 I bought a set of [MG90S Micro Servos](https://amzn.to/2I6sZSC). The Pi tells the servo to go, the servo hits the bell with a little armature, and there you have it.
 
