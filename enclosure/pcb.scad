@@ -1,10 +1,10 @@
 module Pegs(height, pin_diameter) {
   $fn = 90;
-  pcb_thickness = 1.6;
+  pcb_thickness = 1.9;
 
-  for (i = [-1, 1]) {
-    for (j = [-1, 1]) {
-      translate([i * (27 / 2), j * (28 / 2), 0]) {
+  for (i = [-1.05, 0.95]) {
+    for (j = [-0.8, 1.2]) {
+      translate([i * (58 / 2), j * (23 / 2), 0]) {
         linear_extrude(height)
           circle(r = 2.5);
         linear_extrude(height + pcb_thickness)
@@ -16,13 +16,13 @@ module Pegs(height, pin_diameter) {
 
 module PCBLid(top_thickness, wall_thickness) {
   pcb_padding = 2;
-  pcb_x = 33 + pcb_padding;
-  pcb_y = 34 + pcb_padding;
+  pcb_x = 72 + pcb_padding;
+  pcb_y = 50 + pcb_padding;
   radius = 5;
-  pcb_thickness = 1.6 + 8.4; // pcb + components
-  lid_height = 8.4;
+  pcb_thickness = 1.9 + 20; // pcb + components
+  lid_height = 3;
 
-  lip_height = 2.3;
+  lip_height = 2;
   outer_lid_x = ((pcb_x + (wall_thickness * 2)) - (radius * 2));
   outer_lid_y = ((pcb_y + (wall_thickness * 2)) - (radius * 2));
 
@@ -59,29 +59,23 @@ module PCBLid(top_thickness, wall_thickness) {
         square(size = [5, 2], center = true);
     }
 
-    cylinder_length = 8;
-    cylinder_radius = 3;
-    translate([ -(((pcb_x - pcb_padding) / 2) + (cylinder_length / 2)), ((pcb_y - pcb_padding) / 2) - cylinder_radius, top_thickness + lid_height])
-      union() {
-        rotate(a = [0, 90, 0])
-          cylinder(h = cylinder_length, r = cylinder_radius);
-        translate([0, -cylinder_radius, 0])
-          linear_extrude(cylinder_radius)
-          square(size = [cylinder_length, cylinder_radius * 2]);
-      }
+    mirror([1,0,0])
+        translate([0,0,-.001])
+            linear_extrude(1)
+                text("Clarence 2.0", font = f, halign = "center", valign = "center", size = 8);
   }
 }
 
-module PCBCase(bottom_thickness, wall_thickness, peg_height = 6, pin_diameter = 2.3) {
+module PCBCase(bottom_thickness, wall_thickness, peg_height = 3, pin_diameter = 2.3) {
   pcb_padding = 2;
-  pcb_x = 33 + pcb_padding;
-  pcb_y = 34 + pcb_padding;
+  pcb_x = 72 + pcb_padding;
+  pcb_y = 50 + pcb_padding;
 
-  usb_height = 5;
-  usb_width  = 8;
+  usb_height = 8;
+  usb_width  = 14;
 
   radius = 5;
-  pcb_thickness = 1.6 + 8.4; // pcb + components
+  pcb_thickness = 1.9 + 20; // pcb + components
 
   translate([0, 0, bottom_thickness]) {
     difference() {
@@ -100,8 +94,15 @@ module PCBCase(bottom_thickness, wall_thickness, peg_height = 6, pin_diameter = 
           square(size = [pcb_x - (radius * 2), pcb_y - (radius * 2)], center = true);
         }
 
+      // Wire hole
+      translate([((pcb_x - pcb_padding) / 2) - 35, ((pcb_y + wall_thickness) / 2), peg_height + 14])
+        color("blue")
+        linear_extrude(6)
+        // Add 1 so it looks nice in preview
+        square(size = [6, wall_thickness + 1], center = true);
+
       // USB hole
-      translate([((pcb_x - pcb_padding) / 2) - 12, -((pcb_y + wall_thickness) / 2), peg_height - usb_height + 0.5])
+      translate([((pcb_x - pcb_padding) / 2) - 61, ((pcb_y + wall_thickness) / 2), peg_height + 1])
         color("blue")
         linear_extrude(usb_height)
         // Add 1 so it looks nice in preview
@@ -113,5 +114,5 @@ module PCBCase(bottom_thickness, wall_thickness, peg_height = 6, pin_diameter = 
   }
 }
 
-//PCBCase(1.5, 1.5);
-PCBLid(1.5, 1.5);
+PCBCase(1.5, 1.5);
+//PCBLid(1.5, 1.5);

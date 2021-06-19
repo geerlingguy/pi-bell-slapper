@@ -2,8 +2,8 @@ module SolenoidMount() {
   bottom_padding = 2;
 
   solenoid_z = 12;
-  solenoid_x = 11;
-  solenoid_y = 20.5;
+  solenoid_x = 11.5;
+  solenoid_y = 21;
 
   wall_thickness = 1;
 
@@ -35,16 +35,6 @@ module SolenoidMount() {
           square(size = [wall_thickness, solenoid_y - 4], center = true);
       }
     }
-
-    translate([0, 0, bottom_padding])
-      linear_extrude(1) {
-        front = solenoid_y / 2;
-        translate([-3, front - 5, 0])
-          circle(d = 1.5);
-
-        translate([3, front - 5 - 10, 0])
-          circle(d = 1.5);
-      }
   }
 }
 

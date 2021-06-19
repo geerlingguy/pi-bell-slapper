@@ -18,7 +18,7 @@ module BellBase(plate_thickness, bell_bottom_diameter, fillet_height) {
               square(fillet_height * 2);
               difference() {
                 square(fillet_height * 2, center=true);
-                translate([fillet_height, fillet_height]) circle(fillet_height);
+                translate([fillet_height, fillet_height]) circle(2);
               }
             }
           }
@@ -26,3 +26,5 @@ module BellBase(plate_thickness, bell_bottom_diameter, fillet_height) {
       }
   }
 }
+
+BellBase(1.5, 86, 4);

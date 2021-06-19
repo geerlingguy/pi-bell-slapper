@@ -7,7 +7,7 @@ module BellAndSolenoidStand(pcb = true) {
   plate_thickness = 1.5;
   bell_bottom_diameter = 86;
   bell_bottom_radius = bell_bottom_diameter / 2;
-  bell_diameter = 70;
+  bell_diameter = 72;
   bell_radius = bell_diameter / 2;
 
   fillet_height = 4;
@@ -45,9 +45,9 @@ module BellAndSolenoidStand(pcb = true) {
   }
 
   if (pcb) {
-    translate([((34 + 2 + plate_thickness + solenoid_x + 2) / 2) + 2, -(bell_bottom_radius + ((33 + 2 + plate_thickness) / 2)) + 0.7, 0])
+    translate([((48 + 2 + plate_thickness + solenoid_x + 2) / 2) + 2, -(bell_bottom_radius + ((71.5 + 2 + plate_thickness) / 2)) + 0.7, 0])
       rotate(90)
-      PCBCase(plate_thickness, plate_thickness, 6);
+      PCBCase(plate_thickness, plate_thickness, 3);
   }
 }
 
