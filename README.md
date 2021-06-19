@@ -1,10 +1,10 @@
 # Raspberry Pi Bell Slapper
 
-_a.k.a. "The King of Ding"_
+_a.k.a. "The King of Ding", harbinger of the Internet of Dings_
 
 [![CI](https://github.com/geerlingguy/pi-bell-slapper/workflows/CI/badge.svg)](https://github.com/geerlingguy/pi-bell-slapper/actions?query=workflow%3ACI)
 
-<img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark I" />
+TODO: New Image here: <img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark I" />
 
 Why? I need a Raspberry Pi to slap a bell in response to a particular trigger.
 
@@ -16,13 +16,20 @@ Something is better than nothing, so I made this project, which slaps a bell upo
 
 Why, yes! How did you know?
 
-Watch this video for more on the build: [The Raspberry Pi Bell Slapper - a software-controlled bell](https://www.youtube.com/watch?v=Etr7uIL9spg).
+Watch these videos for more on the build:
+
+  - The Raspberry Pi Internet of Dings Notification Bell - coming soon! (June 2021 - "Clarence 2.0")
+  - [The Raspberry Pi Bell Slapper - a software-controlled bell](https://www.youtube.com/watch?v=Etr7uIL9spg) (December 2020 - "Bell Slapper Mark I")
 
 ## How is the bell slapped?
 
 I thought you'd never ask!
 
-I bought a set of [MG90S Micro Servos](https://amzn.to/2I6sZSC). The Pi tells the servo to go, the servo hits the bell with a little armature, and there you have it.
+The bell is hit by a solenoid, specifically the [uxcell 4.5V mini Push-Pull Solenoid](https://amzn.to/2UkcLvh) I bought from Amazon.
+
+The Pi tells the solenoid to trigger, and a little circuit I built as a hacked-together Pi HAT fires off a short pulse of energy to hit the side of the bell directly.
+
+> In 2020, the original "Mark I" version of the bell was slapped quite differently, using a servo. Read the [Mark I README](README-Mark-I.md) for more information about _that_ version of the bell.
 
 ## What kind of bell does it slap?
 
@@ -30,32 +37,15 @@ I'm currently slapping a boring old call bell. [This call bell](https://amzn.to/
 
 ## How do I slap a bell?
 
-Well now, here's where it gets interesting. I thought I'd share all the code and tell you how it's done. That's why you're reading this, isn't it?
+I'm glad you asked! You'll need to gather some parts and solder together a little control circuit, since the Pi can't drive a 1A solenoid directly through a GPIO pin.
 
-  1. Clone this repository to your Pi: `git clone https://github.com/geerlingguy/pi-bell-slapper.git`
-  1. Run `python3 -m pip install RPi.GPIO` to install required dependencies.
-  1. Plug in the following wires on the servo motor (see illustration below):
+### Parts Needed
 
-     1. Red wire to 5V power (pin 4)
-     1. Brown wire to ground (pin 6)
-     1. Orange wire to GPIO 21 (pin 40)
+TODO: List of parts I used for my build.
 
-  1. Change into this directory (`cd pi-bell-slapper`) and run the command `./bell_slap.py`.
-  1. Wait a second, and you'll see the motor spin, then reverse back to its original position.
+### Assembly
 
-Here's an illustration of the servo connections:
-
-<img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/servo-raspberry-pi-connections.jpeg" width="600" height="401" alt="Servo motor Pi connections" />
-
-> Note: The servo's wires come preinstalled into a 3-pin dupont female connector. You can use a tiny thing to pry up the release on the orange pin barrel connector, and slide that out. Then slide it into a separate 1-pin dupont female connector, and voila! You can then plug that orange wire directly into pin 40.
-
-### But how do I mount this contraption to _actually_ slap a bell?
-
-Well... it's a little more complicated because to slap a real bell, you have to mount the servo motor to something solid, build a little armature to slap the bell, mount the bell so it doesn't move when slapped.
-
-You can see my franken-build up at the top of this README. It ain't pretty, but she's got it where it counts.
-
-Someday I hope to make a 'Mark II' version of the build that looks... not so janky.
+TODO: How did I assemble everything?
 
 ## How do I tie email notifications to the bell slapper?
 
@@ -88,11 +78,13 @@ Then every minute the script will run!
 
 > Note: If you have any errors, cron will email them to localhost (make sure you have something like `postfix` and `mailutils` installed to catch and read those emails). Other cron output goes into the syslog (check `/var/log/syslog`).
 
-For my own Pi model A+, the WiFi chipset I used went to sleep after a minute, causing lookups to fail. So I had to [follow my own directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi), and it worked a lot better.
+If you're using a Pi like the model A+, which doesn't have built-in WiFi, and you're using a cheap USB WiFi dongle to connect to the Internet, there's a chance it will go into a sleep mode after a minute or so—follow [these directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi).
 
 ## Were you inspired by anyone?
 
 Of course I was inspired. You don't think I came up with all this on my own, did you? Alex Meub's [Office Bell Ringer](https://alexmeub.com/office-bell-ringer/) was my inspiration. Go read that post if you want to discover how I was inspired.
+
+The enclosure design was inspired by Aaron Patterson's [Analog Terminal Bell](https://github.com/tenderlove/analog-terminal-bell).
 
 Why are you so interested in _my_ inspiration? Go find your own.
 
