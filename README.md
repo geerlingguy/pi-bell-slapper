@@ -30,7 +30,7 @@ I thought you'd never ask!
 The bell is hit by a solenoid, specifically the [uxcell 4.5V mini Push-Pull Solenoid](https://amzn.to/2UkcLvh) I bought from Amazon.
 
 <p align="center">
-  <img src="clarence-2.0-ding.gif" width="400" height="225" alt="Clarence 2.0 - Raspberry Pi Bell Slapper Solenoid Ding" />
+  <img src="images/clarence-2.0-ding.gif" width="400" height="225" alt="Clarence 2.0 - Raspberry Pi Bell Slapper Solenoid Ding" />
 </p>
 
 The Pi tells the solenoid to trigger, and a little circuit I built as a hacked-together Pi HAT fires off a short pulse of energy to hit the side of the bell directly.

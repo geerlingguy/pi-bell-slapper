@@ -1,6 +1,6 @@
 ## Mark I - "Ye Olde Bell Slapper"
 
-<img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark I" />
+<img src="images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark I" />
 
 The original 2020 version of the notification bell was slapped using one of a pair of [MG90S Micro Servos](https://amzn.to/2I6sZSC) I bought from Amazon. The Pi tells the servo to go, the servo hits the bell with a little armature, and there you have it.
 
