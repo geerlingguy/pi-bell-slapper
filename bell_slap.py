@@ -24,7 +24,7 @@ def slap_the_bell():
 
         # Slap the bell.
         GPIO.output(4, GPIO.HIGH)
-        time.sleep(0.01)
+        sleep(0.01)
         GPIO.output(4, GPIO.LOW)
 
     except KeyboardInterrupt:
