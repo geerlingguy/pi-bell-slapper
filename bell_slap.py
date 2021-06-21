@@ -15,23 +15,17 @@ except ModuleNotFoundError:
 # Slap the bell.
 def slap_the_bell():
     try:
-        # Set up GPIO
-        servo_pin = 21  # GPIO Pin where servo is connected
-        GPIO.setmode(GPIO.BCM)
+        # GPIO Pin where solenoid control circuit is connected.
+        solenoid_pin = 4
 
-        # Define the Pin numbering type and define Servo Pin as output pin
-        GPIO.setup(servo_pin, GPIO.OUT)
-        p = GPIO.PWM(servo_pin, 50)  # PWM channel at 50 Hz frequency
-        p.start(0)  # Zero duty cycle initially
+        # Define the Pin numbering type and define Servo Pin as output pin.
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(solenoid_pin, GPIO.OUT)
 
         # Slap the bell.
-        sleep(0.4)
-        p.ChangeDutyCycle(12)
-        sleep(0.4)
-        p.ChangeDutyCycle(11)
-        sleep(0.25)
-        p.ChangeDutyCycle(12)
-        sleep(0.4)
+        GPIO.output(4, GPIO.HIGH)
+        time.sleep(0.01)
+        GPIO.output(4, GPIO.LOW)
 
     except KeyboardInterrupt:
         print("User stopped script during execution.")
