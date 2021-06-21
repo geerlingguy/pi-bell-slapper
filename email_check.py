@@ -46,6 +46,7 @@ for msgid, message_data in server.fetch(messages, ['RFC822']).items():
     if from_contains in email_from and subject_contains in email_subject:
         print("Found matching email: %s\n" % email_subject)
         bell_slap.slap_the_bell()
-        sleep(0.5)
+        # Sleep for a few seconds between dings.
+        sleep(random.randint(1, 5))
 
 server.logout()
