@@ -41,7 +41,23 @@ I'm glad you asked! You'll need to gather some parts and solder together a littl
 
 ### Parts Needed
 
-TODO: List of parts I used for my build.
+  - [Raspberry Pi Zero W](https://www.raspberrypi.org/products/raspberry-pi-zero-w/)
+  - [Micro USB Power adapter](https://amzn.to/3zGpCrL)
+  - [5V Push-Pull Solenoid](https://amzn.to/3cYFxI2)
+  - [Double-sided Prototyping board](https://amzn.to/3zTqrxE)
+  - [IRL7833PBF MOSFET Transistor - 30V 150A](https://amzn.to/3iYr3Mj)
+  - [1A 50V Diode](https://amzn.to/3wNcJtY)
+  - 10K Ohm Resistor
+  - [Electronics hook-up wire](https://amzn.to/3xEUxCS)
+  - [2x4 8-pin female headers](https://amzn.to/3vLDa1O)
+
+### Tools Needed
+
+These are the tools I used (though you can use whatever version you have):
+
+  - [Weller WES51 Soldering Station](https://amzn.to/3iUX6g8)
+  - [Adjustable Circuit board holder](https://amzn.to/35CrgNo) (not necessary but helpful)
+  - [Ender 3 v2 3D Printer](https://amzn.to/3xGxojo)
 
 ### Assembly
 
