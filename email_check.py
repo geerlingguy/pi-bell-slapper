@@ -7,6 +7,7 @@ import yaml
 import logging
 import email
 import bell_slap
+from time import sleep
 from imapclient import IMAPClient
 
 # Store where we currently are in the filesystem.
@@ -45,5 +46,6 @@ for msgid, message_data in server.fetch(messages, ['RFC822']).items():
     if from_contains in email_from and subject_contains in email_subject:
         print("Found matching email: %s\n" % email_subject)
         bell_slap.slap_the_bell()
+        sleep(0.5)
 
 server.logout()
