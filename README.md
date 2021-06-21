@@ -4,7 +4,7 @@ _a.k.a. "The King of Ding", harbinger of the Internet of Dings_
 
 [![CI](https://github.com/geerlingguy/pi-bell-slapper/workflows/CI/badge.svg)](https://github.com/geerlingguy/pi-bell-slapper/actions?query=workflow%3ACI)
 
-TODO: New Image here: <img src="https://raw.githubusercontent.com/geerlingguy/pi-bell-slapper/master/images/bell-slapper-mark-1.jpeg" width="600" height="408" alt="Raspberry Pi Bell Slapper - Mark I" />
+<img src="images/clarence-2.0.jpeg" width="600" height="400" alt="Clarence 2.0 - Raspberry Pi Bell Slapper" />
 
 Why? I need a Raspberry Pi to slap a bell in response to a particular trigger.
 
@@ -53,7 +53,7 @@ I'm glad you asked! You'll need to gather some parts and solder together a littl
 
 ### Tools Needed
 
-These are the tools I used (though you can use whatever version you have):
+These are the tools I used to put everything together (though you can use any suitable substitute):
 
   - [Weller WES51 Soldering Station](https://amzn.to/3iUX6g8)
   - [Adjustable Circuit board holder](https://amzn.to/35CrgNo) (not necessary but helpful)
