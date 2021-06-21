@@ -7,6 +7,7 @@ import yaml
 import logging
 import email
 import bell_slap
+from random import randint
 from time import sleep
 from imapclient import IMAPClient
 
@@ -47,6 +48,6 @@ for msgid, message_data in server.fetch(messages, ['RFC822']).items():
         print("Found matching email: %s\n" % email_subject)
         bell_slap.slap_the_bell()
         # Sleep for a few seconds between dings.
-        sleep(random.randint(1, 5))
+        sleep(randint(1, 5))
 
 server.logout()
