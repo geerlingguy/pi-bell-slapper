@@ -80,7 +80,7 @@ I built this project to monitor an email inbox. So I wrote a Python script, `ema
 To make this script work, you need to do two things on the Pi:
 
   1. Copy the `config.example.yml` file to a file named `config.yml`, and modify it with the email credentials for the account to be monitored.
-  2. Make sure Pip is installed: ``sudo apt install -y python3-pip`
+  2. Make sure Pip is installed: `sudo apt install -y python3-pip`
   3. Run `python3 -m pip install imapclient pyyaml` to install required dependencies.
 
 Then run `./email_check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
