@@ -67,7 +67,15 @@ These are the tools I used to put everything together (though you can use any su
 
 ### Assembly
 
-TODO: How did I assemble everything?
+Check out [this circuit diagram on Circuito.io](https://www.circuito.io/app?components=9443,11015,200000):
+
+<p align="center">
+  <img src="images/circuito-circuit-pi-solenoid.png" width="477" height="538" alt="Raspberry Pi GPIO 4 Solenoid control circuit" />
+</p>
+
+You could just stick everything into a breadboard like it's laid out in that diagram, but I decided to take a small protoboard and solder everything more permanently into a makeshift HAT that attaches to the top of the Pi Zero directly.
+
+TODO: Add more detailed directions for wiring everything together—maybe also build a custom PCB?
 
 ## How do I tie email notifications to the bell slapper?
 
