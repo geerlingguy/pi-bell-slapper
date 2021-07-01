@@ -20,7 +20,7 @@ Why, yes! How did you know?
 
 Watch these videos for more on the build:
 
-  - The Raspberry Pi Internet of Dings Notification Bell - coming soon! (June 2021 - "Clarence 2.0")
+  - [The Raspberry Pi Internet of Dings Notification Bell](https://www.youtube.com/watch?v=o5wOzNzShrA) (June 2021 - "Clarence 2.0")
   - [The Raspberry Pi Bell Slapper - a software-controlled bell](https://www.youtube.com/watch?v=Etr7uIL9spg) (December 2020 - "Bell Slapper Mark I")
 
 ## How is the bell slapped?
