@@ -77,6 +77,14 @@ You could just stick everything into a breadboard like it's laid out in that dia
 
 TODO: Add more detailed directions for wiring everything together—maybe also build a custom PCB?
 
+## How do I contain this bell-slapping awesomeness?
+
+I'm glad you asked. Over in the [`enclosure`](enclosure) directory, there are STL files for a case and lid. Print those on a 3D printer, mount everything inside, and you'll be good to go!
+
+For the current design, I use friction and gravity to hold the Pi Zero and custom HAT in place, and superglue to hold in the solenoid.
+
+The case design is derived from [@tenderlove's Analog Terminal Bell case](https://github.com/tenderlove/analog-terminal-bell/tree/master/case), and is modeled in OpenSCAD. The source files are also in the `enclosure` directory, should you like them.
+
 ## How do I tie email notifications to the bell slapper?
 
 Well, now we're getting to the meat of it.
