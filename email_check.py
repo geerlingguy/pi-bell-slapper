@@ -29,6 +29,7 @@ server.login(config['email']['username'], config['email']['password'])
 # See how many messages are in the inbox.
 select_info = server.select_folder('INBOX')
 logging.info('Messages in INBOX: %d' % select_info[b'EXISTS'])
+print('Messages in INBOX: %d' % select_info[b'EXISTS'])
 
 while True:
     try:
@@ -36,9 +37,9 @@ while True:
         messages = server.search('UNSEEN')
         logging.info("Unread messages: %d\n" % len(messages))
         print("Unread messages: %d\n" % len(messages))
-        if messages != 0:
+        if len(messages) >= 0:
             gpio_pins.led_sequence()
-        sleep(30)
+        sleep(10)
     except KeyboardInterrupt:
         break
 
