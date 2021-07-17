@@ -12,7 +12,7 @@ except ModuleNotFoundError:
 
 
 # Slap the bell.
-def led_up():
+def led_sequence():
     try:
         # GPIO Pin where LEDs' connected.
         led_pins = [37, 38, 40]
@@ -43,4 +43,4 @@ def led_up():
 
 if __name__ == '__main__':
     # This script is being executed directly. leds go brr!
-    led_up()
+    led_sequence()
