@@ -18,7 +18,7 @@ def led_up():
         led_pins = [37, 38, 40]
 
         # Define the Pin numbering type and define LED Pins as output pins.
-        GPIO.setmode(GPIO.BCM)
+        GPIO.setmode(GPIO.BOARD)
         GPIO.setup(led_pins, GPIO.OUT)
 
         # LED sequence
