@@ -37,7 +37,7 @@ while True:
         messages = server.search('UNSEEN')
         logging.info("Unread messages: %d\n" % len(messages))
         print("Unread messages: %d\n" % len(messages))
-        if len(messages) >= 0:
+        if len(messages) > 0:
             gpio_pins.led_sequence()
         sleep(10)
     except KeyboardInterrupt:
