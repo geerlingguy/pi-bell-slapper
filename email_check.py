@@ -26,13 +26,14 @@ with open(os.path.join(__location__, "config.yml"), 'r') as stream:
 server = IMAPClient(config['email']['imap_host'])
 server.login(config['email']['username'], config['email']['password'])
 
-# See how many messages are in the inbox.
-select_info = server.select_folder('INBOX')
-logging.info('Messages in INBOX: %d' % select_info[b'EXISTS'])
-print('Messages in INBOX: %d' % select_info[b'EXISTS'])
+
 
 while True:
     try:
+        # See how many messages are in the inbox.
+        select_info = server.select_folder('INBOX')
+        logging.info('Messages in INBOX: %d' % select_info[b'EXISTS'])
+        print('Messages in INBOX: %d' % select_info[b'EXISTS'])
         # See if there are any new messages.
         messages = server.search('UNSEEN')
         logging.info("Unread messages: %d\n" % len(messages))
