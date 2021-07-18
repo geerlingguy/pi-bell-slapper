@@ -40,6 +40,8 @@ while True:
         print("Unread messages: %d\n" % len(messages))
         if len(messages) > 0:
             gpio_pins.led_sequence(1)
+        else:
+            gpio_pins.led_sequence(2)
         sleep(10)
     except KeyboardInterrupt:
         break

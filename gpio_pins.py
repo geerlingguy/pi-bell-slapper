@@ -40,12 +40,14 @@ def led_sequence(n):
             sleep(0.3)
             GPIO.output(led_pins, GPIO.LOW)
         elif n == 2:
+            # 37 : green led
             while True:
                 GPIO.output(led_pins[37], GPIO.HIGH)
                 sleep(0.3)
                 GPIO.output(led_pins[37], GPIO.LOW)
-                sleep(0.3)
+                sleep(2)
         else:
+            # 38 : yellow led
             while True:
                 GPIO.output(led_pins[38], GPIO.HIGH)
                 sleep(0.3)
