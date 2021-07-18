@@ -11,21 +11,47 @@ except ModuleNotFoundError:
     print("RPi module not found. Ignoring GPIO interactions.\n")
 
 
-# Slap the bell.
-def led_sequence():
+# LED sequences
+def led_sequence(n):
     try:
         # GPIO Pin where LEDs' connected.
         led_pins = [37, 38, 40]
-
+    
         # Define the Pin numbering type and define LED Pins as output pins.
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(led_pins, GPIO.OUT)
 
-        # LED sequence
-        for led in led_pins:
-            GPIO.output(led, GPIO.HIGH)
-            sleep(0.1)
-            GPIO.output(led, GPIO.LOW)
+        if n == 1:
+            for led in led_pins:
+                GPIO.output(led, GPIO.HIGH)
+                sleep(0.5)
+                GPIO.output(led, GPIO.LOW)
+                sleep(0.3)
+            for led in reversed(led_pins):
+                GPIO.output(led, GPIO.HIGH)
+                sleep(0.5)
+                GPIO.output(led, GPIO.LOW)
+                sleep(0.3)
+            GPIO.output(led_pins, GPIO.HIGH)
+            sleep(0.3)
+            GPIO.output(led_pins, GPIO.LOW)
+            sleep(0.3)
+            GPIO.output(led_pins, GPIO.HIGH)
+            sleep(0.3)
+            GPIO.output(led_pins, GPIO.LOW)
+        elif n == 2:
+            while True:
+                GPIO.output(led_pins[37], GPIO.HIGH)
+                sleep(0.3)
+                GPIO.output(led_pins[37], GPIO.LOW)
+                sleep(0.3)
+        else:
+            while True:
+                GPIO.output(led_pins[38], GPIO.HIGH)
+                sleep(0.3)
+                GPIO.output(led_pins[38], GPIO.LOW)
+                sleep(0.3)
+        
 
     except KeyboardInterrupt:
         print("User stopped script during execution.")
