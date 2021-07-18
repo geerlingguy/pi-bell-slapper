@@ -2,7 +2,7 @@
 
 # GPIO interactions
 
-from time import sleep
+from time import sleep, time
 
 # Try importing the GPIO library.
 try:
@@ -15,7 +15,7 @@ except ModuleNotFoundError:
 def led_sequence(n):
     try:
         # GPIO Pin where LEDs' connected.
-        led_pins = [37, 38, 40]
+        led_pins = [37, 38, 40] #green, yellow, red
     
         # Define the Pin numbering type and define LED Pins as output pins.
         GPIO.setmode(GPIO.BOARD)
@@ -40,20 +40,23 @@ def led_sequence(n):
             sleep(0.3)
             GPIO.output(led_pins, GPIO.LOW)
         elif n == 2:
-            # 37 : green led
+            timeout = time() + 7
             while True:
                 GPIO.output(led_pins[0], GPIO.HIGH)
-                sleep(0.4)
+                sleep(0.3)
                 GPIO.output(led_pins[0], GPIO.LOW)
                 sleep(2)
-        else:
-            # 38 : yellow led
+                if time() >= timeout:
+                    break
+        elif n == 3:
+            timeout = time() + 7
             while True:
                 GPIO.output(led_pins[1], GPIO.HIGH)
                 sleep(0.3)
                 GPIO.output(led_pins[1], GPIO.LOW)
-                sleep(0.3)
-        
+                sleep(2)
+                if time() >= timeout:
+                    break
 
     except KeyboardInterrupt:
         print("User stopped script during execution.")
