@@ -1,2 +1,2 @@
-imapclient==2.2.0
+imapclient
 pyyaml==5.1
