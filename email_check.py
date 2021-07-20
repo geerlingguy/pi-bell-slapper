@@ -41,7 +41,7 @@ while True:
         if len(messages) > 0:
             gpio_pins.led_sequence(1)
         else:
-            gpio_pins.led_sequence(2)
+            gpio_pins.led_sequence(0)
         sleep(10)
     except KeyboardInterrupt:
         break

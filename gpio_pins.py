@@ -20,43 +20,34 @@ def led_sequence(n):
         # Define the Pin numbering type and define LED Pins as output pins.
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(led_pins, GPIO.OUT)
-
-        if n == 1:
-            for led in led_pins:
-                GPIO.output(led, GPIO.HIGH)
+        while True:
+            GPIO.output(led_pins[0], GPIO.HIGH)
+            sleep(0.5)
+            GPIO.output(led_pins[0], GPIO.LOW)
+            sleep(0.5)
+            if n == 1:
+                for led in led_pins:
+                    GPIO.output(led, GPIO.HIGH)
+                    sleep(0.5)
+                    GPIO.output(led, GPIO.LOW)
+                    sleep(0.5)
+                for led in reversed(led_pins):
+                    GPIO.output(led, GPIO.HIGH)
+                    sleep(0.5)
+                    GPIO.output(led, GPIO.LOW)
+                    sleep(0.5)
+                GPIO.output(led_pins, GPIO.HIGH)
                 sleep(0.5)
-                GPIO.output(led, GPIO.LOW)
-                sleep(0.3)
-            for led in reversed(led_pins):
-                GPIO.output(led, GPIO.HIGH)
+                GPIO.output(led_pins, GPIO.LOW)
                 sleep(0.5)
-                GPIO.output(led, GPIO.LOW)
-                sleep(0.3)
-            GPIO.output(led_pins, GPIO.HIGH)
-            sleep(0.3)
-            GPIO.output(led_pins, GPIO.LOW)
-            sleep(0.3)
-            GPIO.output(led_pins, GPIO.HIGH)
-            sleep(0.3)
-            GPIO.output(led_pins, GPIO.LOW)
-        elif n == 2:
-            timeout = time() + 7
-            while True:
-                GPIO.output(led_pins[0], GPIO.HIGH)
-                sleep(0.3)
-                GPIO.output(led_pins[0], GPIO.LOW)
-                sleep(2)
-                if time() >= timeout:
-                    break
-        elif n == 3:
-            timeout = time() + 7
-            while True:
+                GPIO.output(led_pins, GPIO.HIGH)
+                sleep(0.5)
+                GPIO.output(led_pins, GPIO.LOW)
+            elif n == 2:
                 GPIO.output(led_pins[1], GPIO.HIGH)
-                sleep(0.3)
+                sleep(0.5)
                 GPIO.output(led_pins[1], GPIO.LOW)
-                sleep(2)
-                if time() >= timeout:
-                    break
+                sleep(0.5)
 
     except KeyboardInterrupt:
         print("User stopped script during execution.")
