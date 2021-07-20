@@ -21,10 +21,7 @@ def led_sequence(n):
         GPIO.setmode(GPIO.BOARD)
         GPIO.setup(led_pins, GPIO.OUT)
         while True:
-            GPIO.output(led_pins[0], GPIO.HIGH)
-            sleep(0.5)
-            GPIO.output(led_pins[0], GPIO.LOW)
-            sleep(0.5)
+            
             if n == 1:
                 for led in led_pins:
                     GPIO.output(led, GPIO.HIGH)
@@ -43,11 +40,19 @@ def led_sequence(n):
                 GPIO.output(led_pins, GPIO.HIGH)
                 sleep(0.5)
                 GPIO.output(led_pins, GPIO.LOW)
+                break
             elif n == 2:
                 GPIO.output(led_pins[1], GPIO.HIGH)
                 sleep(0.5)
                 GPIO.output(led_pins[1], GPIO.LOW)
                 sleep(0.5)
+                break
+            else:
+                GPIO.output(led_pins[0], GPIO.HIGH)
+                sleep(0.5)
+                GPIO.output(led_pins[0], GPIO.LOW)
+                sleep(0.5)
+                break
 
     except KeyboardInterrupt:
         print("User stopped script during execution.")
