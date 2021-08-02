@@ -127,6 +127,12 @@ The enclosure design was inspired by Aaron Patterson's [Analog Terminal Bell](ht
 
 Why are you so interested in _my_ inspiration? Go find your own.
 
+## Is this project sponsored?
+
+Technically, no. But monetarily, yes! Special thanks to the folks at [WTI](https://www.wti.com) ([@wtinetworkgear](https://github.com/wtinetworkgear)) for sponsoring this project.
+
+You can sponsor too, via [GitHub Sponsors](https://github.com/sponsors/geerlingguy)!
+
 ## Who are you?
 
 I'm [Jeff Geerling](https://www.jeffgeerling.com), and I approve of this repository.
