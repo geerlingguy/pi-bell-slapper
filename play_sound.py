@@ -21,7 +21,7 @@ def play_the_sound(file='./ding.wav'):
     sound = pygame.mixer.Sound(sound_file)
     playing = sound.play()
     while playing.get_busy():
-       pygame.time.delay(100)
+        pygame.time.delay(100)
 
 
 if __name__ == '__main__':
