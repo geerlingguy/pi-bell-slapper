@@ -10,3 +10,10 @@ email:
 conditions:
   from_contains: 'person@example.com'
   subject_contains: 'Thank you for your support!'
+
+bell:
+  enable: true
+
+sound:
+  enable: false
+  file: ding.mp3
