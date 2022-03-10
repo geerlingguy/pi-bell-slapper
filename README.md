@@ -119,6 +119,49 @@ Then every minute the script will run!
 
 If you're using a Pi like the model A+, which doesn't have built-in WiFi, and you're using a cheap USB WiFi dongle to connect to the Internet, there's a chance it will go into a sleep mode after a minute or so—follow [these directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi).
 
+## How do I control the Bell Slapper via a Web UI?
+
+This project contains a tiny PHP web application that lets you slap the bell from anywhere you can reach the Pi (usually just on the local network). All you need is a phone, tablet, or computer with a web browser.
+
+If the hostname of the Pi is `bell-slapper.local`, just visit that URL in your browser, and voila! You won't see anything!
+
+That's because to get it working, you'll need to install PHP and Apache first:
+
+```
+# Install PHP and Apache.
+$ sudo apt update
+$ sudo apt install apache2 php -y
+
+# Verify that PHP was installed.
+$ php -v
+PHP 7.3.31-1~deb10u1 (cli)
+```
+
+Then add an Apache VirtualHost defining the path to this project's web directory:
+
+```
+$ sudo nano /etc/apache2/sites-enabled/pi-bell-slapper.conf
+
+# Paste the following inside that file and save it:
+<VirtualHost *:80>
+    DocumentRoot "/home/pi/pi-bell-slapper/web"
+    ServerName clarence.local
+    DirectoryIndex index.php
+    <Directory /home/pi/pi-bell-slapper/web>
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+Finally, add the Apache user to the GPIO group so it can run the bell slapper script, and then restart Apache:
+
+```
+$ sudo usermod -a -G gpio www-data
+$ sudo systemctl restart apache2
+```
+
+Now visit `bell-slapper.local` in a browser, and ding away to your heart's content!
+
 ## Were you inspired by anyone?
 
 Of course I was inspired. You don't think I came up with all this on my own, did you? Alex Meub's [Office Bell Ringer](https://alexmeub.com/office-bell-ringer/) was my inspiration. Go read that post if you want to discover how I was inspired.
