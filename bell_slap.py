@@ -6,6 +6,7 @@ from time import sleep
 import argparse
 import RPi.GPIO as GPIO
 
+
 # Slap the bell.
 def slap_the_bell():
     try:
@@ -14,8 +15,8 @@ def slap_the_bell():
 
         # Define optional command line arguments.
         parser = argparse.ArgumentParser()
-        parser.add_argument("-c", "--count", help = "Count (how many dings)")
-        parser.add_argument("-i", "--interval", help = "Interval between dings")
+        parser.add_argument("-c", "--count", help="Count (how many dings)")
+        parser.add_argument("-i", "--interval", help="Interval between dings")
 
         # Get arguments from command line (if supplied).
         args = parser.parse_args()
@@ -24,8 +25,8 @@ def slap_the_bell():
 
         # Don't allow dinging faster than every 0.05 seconds.
         if ding_interval < 0.05:
-          ding_interval = float('0.05')
-          print("Interval was reset to 0.05 to protect the circuit.")
+            ding_interval = float('0.05')
+            print("Interval was reset to 0.05 to protect the circuit.")
 
         # Define the Pin numbering type and define Servo Pin as output pin.
         GPIO.setmode(GPIO.BCM)
