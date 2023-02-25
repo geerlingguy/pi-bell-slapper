@@ -102,6 +102,8 @@ To make this script work, you need to do two things on the Pi:
 Then run `./email_check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
 
 > You might also need to install Pip, if you get an error on the `python3 -m pip` command. To do that, run `sudo apt install -y python3-pip`.
+>
+> If using Office 365, you should also install `o365` with `python3 -m pip install o365`.
 
 ### How do I continuously check the email inbox?
 
