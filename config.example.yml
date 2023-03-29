@@ -6,6 +6,10 @@ email:
   imap_host: imap.gmail.com
   imap_port: 993
 
+o365:
+  client_id: client-app-id-here
+  client_secret: client-app-secret-here
+
 # Conditions to match for unread messages.
 conditions:
   from_contains: 'person@example.com'
