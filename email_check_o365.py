@@ -6,11 +6,11 @@ import os
 import yaml
 import logging
 import email
-import bell_slap
-import play_sound
+#import bell_slap
+#import play_sound
 from random import randint
 from time import sleep
-from O365 import Account, Connection, MSGraphProtocol, Message, MailBox, oauth_authentication_flow
+from O365 import Account, Connection, MSGraphProtocol, Message
 
 # Store where we currently are in the filesystem.
 __location__ = os.path.realpath(
@@ -27,13 +27,14 @@ with open(os.path.join(__location__, "config.yml"), 'r') as stream:
 scopes = ['basic', 'message_all']
 # TODO: See https://github.com/O365/python-o365#install
 # TODO: See https://stackoverflow.com/a/55501390
-credentials = (<secret>, <another secret>)  # TODO - Get these.
+credentials = (config['o365']['client_id'], config['o365']['client_secret'])
 account = Account(credentials = credentials)
 if not account.is_authenticated:
-    account.authenticate(scopes = scopes)
+    if account.authenticate(scopes = scopes):
+        print('Authenticated!')
 
 # Get Inbox, print 25 emails.
-account.connection.refresh_token()mailbox = account.mailbox()
+account.connection.refresh_token().mailbox = account.mailbox()
 inbox = mailbox.get_folder(folder_name='Inbox')
 for message in inbox.get_messages(25):
     print (message.subject)

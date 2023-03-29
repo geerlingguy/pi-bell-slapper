@@ -105,6 +105,26 @@ Then run `./email_check.py`, and prepare to be amazed! Or not, especially if it 
 >
 > If using Office 365, you should also install `o365` with `python3 -m pip install o365`.
 
+### How do I work with Office 356 Email Accounts
+
+Well... it'll be annoying, but we might be able to get it working.
+
+First, make sure you install the o365 Python library:
+
+```
+python3 -m pip install o365
+```
+
+Then, you'll need to authenticate an Azure app on behalf of the email user. First, go through the insane process of [setting up a new app in Azure](https://github.com/O365/python-o365#usage), and grabbing it's App (client) ID and App Client Secret. Stash those inside the appropriate place in `config.yml`.
+
+Then run `python3 email_check_o365.py` and it will spit out a URL you have to visit to authenticate.
+
+Copy that URL, paste it in a browser, then log in as the user whose email address you want to use.
+
+After logging in, copy the URL in the browser and paste it where it says "Paste the authenticated url here:" in the console.
+
+TODO.
+
 ### How do I continuously check the email inbox?
 
 Well now we're really getting somewhere useful!
