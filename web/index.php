@@ -1,19 +1,36 @@
 <?php
 /**
  * Ding function. It sends the dings.
+ *
+ * @todo - There is no error handling here currently. It'll act like it dinged
+ *   the dinger no matter what happens.
  */
-function ding($count = 1, $interval = 0.1) {
-  system('python3 /home/pi/pi-bell-slapper/bell_slap.py -c ' . $count . ' -i ' . $interval, $retval);
+function ding($count = 1, $interval = 0.1, $play_sound = false) {
+  $config = yaml_parse_file('/home/pi/pi-bell-slapper/config.yml');
+
+  foreach (range(1, $count) as $i) {
+    // Ding the bell.
+    system('python3 /home/pi/pi-bell-slapper/bell_slap.py', $retval);
+
+    if ($play_sound) {
+      // Play the sound.
+      system('python3 /home/pi/pi-bell-slapper/play_sound.py -f ' . $config['sound']['file'], $retval);
+    }
+
+    // Wait the interval.
+    usleep($interval * 1000000);
+  }
 }
 
-// See if a ding was just submitted.
-if (array_key_exists('ding', $_POST)) {
+// Handle a ding that was just submitted.
+if (array_key_exists('ding', $_POST) || array_key_exists('ding_plus_sound', $_POST)) {
   $count = (int) filter_var($_POST['dingCount'], FILTER_VALIDATE_INT);
   $interval = (float) filter_var($_POST['dingInterval'], FILTER_VALIDATE_FLOAT);
-  ding($count, $interval);
+  $play_sound = isset($_POST['ding_plus_sound']);
+  ding($count, $interval, $play_sound);
 
   // Fill in the status message if we just dinged.
-  $status = "<strong>Success!</strong> The bell has been slapped.";
+  $status = "<strong>Success!</strong> The bell has been slapped " . $count . " time" . ($count != 1 ? 's' : '') . ".";
 }
 else {
   $count = (int) 1;
@@ -25,7 +42,7 @@ else {
 <head>
   <title>Pi Bell Slapper - Control Panel</title>
   <!-- TODO Add the stylesheet to the project. No CDN. -->
-  <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" media="screen" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -40,7 +57,7 @@ else {
         </div>
 <?php
 if (isset($status)) {
-  echo '<div class="alert alert-success">' . $status . '</div>';
+  echo '<div class="alert alert-dismissible alert-success fade show">' . $status . '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
 }
 ?>
         <div class="card">
@@ -60,6 +77,7 @@ if (isset($status)) {
               </div>
 
               <input type="submit" class="btn btn-primary" name="ding" id="ding" value="DING" />
+              <input type="submit" class="btn btn-secondary" name="ding_plus_sound" id="ding_plus_sound" value="DING + SOUND" />
             </form>
           </div>
         </div>
@@ -74,5 +92,11 @@ if (isset($status)) {
       </div>
     </div>
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+  <script>
+    setTimeout(function() {
+        bootstrap.Alert.getOrCreateInstance(document.querySelector(".alert")).close();
+    }, 3000)
+  </script>
 </body>
 </html>

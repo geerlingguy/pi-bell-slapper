@@ -182,7 +182,7 @@ That's because to get it working, you'll need to install PHP and Apache first:
 ```
 # Install PHP and Apache.
 $ sudo apt update
-$ sudo apt install apache2 php -y
+$ sudo apt install apache2 php php-yaml -y
 
 # Verify that PHP was installed.
 $ php -v
@@ -197,7 +197,7 @@ $ sudo nano /etc/apache2/sites-enabled/pi-bell-slapper.conf
 # Paste the following inside that file and save it:
 <VirtualHost *:80>
     DocumentRoot "/home/pi/pi-bell-slapper/web"
-    ServerName clarence.local
+    ServerName bell-slapper.local
     DirectoryIndex index.php
     <Directory /home/pi/pi-bell-slapper/web>
         Require all granted
@@ -213,6 +213,8 @@ $ sudo systemctl restart apache2
 ```
 
 Now visit `bell-slapper.local` in a browser, and ding away to your heart's content!
+
+> If you need to update the hostname of the Pi, run `sudo raspi-config`, go to System Options > Hostname, and update the hostname (e.g. `bell-slapper`). Then reboot, and it should be accessible at `bell-slapper.local`.
 
 ## Were you inspired by anyone?
 
