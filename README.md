@@ -141,7 +141,7 @@ $ cat /proc/asound/modules
 
 In this case, I'm using a USB sound card, and it's identified as device number `1`.
 
-Create a file with `nano ~/.asoundrc` with the contents:
+Create a file with `sudo nano /etc/asound.conf` with the contents:
 
 ```
 pcm.!default {
