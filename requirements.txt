@@ -1,0 +1,2 @@
+imapclient
+pyyaml >= 5.1
