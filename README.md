@@ -164,28 +164,35 @@ Verify it's working with `speaker-test -c2 -twav -l7`.
 
 Replace `Device` with your card's name. If sound comes out of an HDMI monitor instead, the default output is set to `vc4hdmi`; re-run the installer and pick the USB card.
 
-## How do I tie email notifications to the bell slapper?
+## How do I ring the bell for new emails?
 
-I built this project to monitor an email inbox. The `email_check.py` script translates "new email arrives" into "the bell has been resoundingly slapped", by calling the API above.
+This is what the bell was built for: ringing during a radiothon whenever an online donation comes in. Our donor database (DonorPerfect) can send an email for each new gift using a "SmartAction", so the bell watches a mailbox for those emails. That avoids giving the Pi an API key to the whole donor database, and works with any system that can send an email.
 
-  1. Copy `config.example.yml` to `config.yml`, and modify it with the email credentials for the account to be monitored.
-  2. Install dependencies: `sudo apt install -y python3-imapclient python3-yaml`
+`email_check.py` runs as the `bell-slapper-email` service. It stays connected to the mailbox using [IMAP IDLE](https://en.wikipedia.org/wiki/IMAP_IDLE), so the server tells it about new mail within a second or two, and it does a DING + SOUND for each unread email matching the configured From and Subject, then marks that email read. If the mailbox or the bell is unreachable, it keeps retrying, and emails stay unread until the bell has rung for them.
 
-Then run `./email_check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
+> Use a mailbox dedicated to the bell. Every matching unread email rings the bell, including any already in the inbox when the service starts.
 
-### How do I continuously check the email inbox?
-
-For now, I'm just using cron. Fire up the ol' crontab editor (`crontab -e`) and add the following line:
+To set it up:
 
 ```
-* * * * * /home/pi/pi-bell-slapper/email_check.py
+sudo mkdir -p /etc/bell-slapper
+sudo cp email.example.yml /etc/bell-slapper/email.yml
+sudo nano /etc/bell-slapper/email.yml   # mailbox details and what to match
+sudo /opt/bell-slapper/email_check.py /etc/bell-slapper/email.yml --test
+sudo ./install.sh --defaults
 ```
 
-Then every minute the script will run!
+The `--test` run logs in and lists matching unread emails, without ringing the bell or marking them read. The install script then starts the service (it only does so if `/etc/bell-slapper/email.yml` exists). The config file is readable only by root; systemd passes it to the service. Watch it work with `journalctl -u bell-slapper-email -f`.
 
-> Note: If you have any errors, cron will email them to localhost (make sure you have something like `postfix` and `mailutils` installed to catch and read those emails). Other cron output goes into the syslog (check `/var/log/syslog`).
+### Which email providers work?
 
-If you're using a Pi like the model A+, which doesn't have built-in WiFi, and you're using a cheap USB WiFi dongle to connect to the Internet, there's a chance it will go into a sleep mode after a minute or so—follow [these directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi).
+Any provider that allows IMAP login with a username and password (or an app password). Some good, cheap options:
+
+  - [Purelymail](https://purelymail.com/pricing) ($10/year): plain IMAP with a normal password. Requires your own domain (a subdomain like `bell.example.com` works).
+  - A dedicated free [Gmail](https://gmail.com) account: turn on 2-Step Verification, then create an [app password](https://myaccount.google.com/apppasswords). Add a filter so the notification emails never go to spam.
+  - [Fastmail](https://www.fastmail.com): use a separate account (not your personal one), with an app password limited to Mail. The Basic plan doesn't include IMAP.
+
+Microsoft 365 / Outlook.com and Google Workspace don't work: they require OAuth logins instead of passwords. Forward the notifications to one of the options above instead.
 
 ## Were you inspired by anyone?
 

@@ -1,0 +1,16 @@
+[Unit]
+Description=Pi Bell Slapper email checker
+After=network-online.target bell-slapper.service
+Wants=network-online.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/bell-slapper/email_check.py
+DynamicUser=yes
+LoadCredential=email.yml:/etc/bell-slapper/email.yml
+NoNewPrivileges=yes
+MemoryMax=64M
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
