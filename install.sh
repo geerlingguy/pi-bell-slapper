@@ -86,6 +86,8 @@ else
 fi
 
 # Reloading systemd is slow on a Pi Zero, so only do it when a unit changed.
+# A new email unit gets enabled; an existing one that was disabled stays off.
+[ -f "/etc/systemd/system/$EMAIL_SERVICE" ] && email_new=false || email_new=true
 reload=false
 for unit in "$SERVICE" "$EMAIL_SERVICE"; do
   if ! cmp -s "$unit" "/etc/systemd/system/$unit"; then
@@ -97,7 +99,7 @@ done
 
 start() {
   echo "Starting $1..."
-  systemctl is-enabled --quiet "$1" || systemctl enable --no-reload "$1"
+  systemctl is-enabled --quiet "$1" || systemctl enable --quiet "$1"
   systemctl restart "$1"
   sleep 2
   systemctl is-active --quiet "$1" || die "$1 failed to start; check: journalctl -u $1"
@@ -106,7 +108,11 @@ start() {
 start "$SERVICE"
 if [ -f "$EMAIL_CONFIG" ]; then
   chmod 600 "$EMAIL_CONFIG"
-  start "$EMAIL_SERVICE"
+  if [ "$email_new" = true ] || systemctl is-enabled --quiet "$EMAIL_SERVICE"; then
+    start "$EMAIL_SERVICE"
+  else
+    echo "$EMAIL_SERVICE is disabled. To turn it on: sudo systemctl enable --now $EMAIL_SERVICE"
+  fi
 else
   echo "To ring the bell for emails, copy email.example.yml to $EMAIL_CONFIG, edit it, and run this again."
 fi

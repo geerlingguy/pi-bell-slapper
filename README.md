@@ -184,6 +184,8 @@ sudo ./install.sh --defaults
 
 The `--test` run logs in and lists matching unread emails, without ringing the bell or marking them read. The install script then starts the service (it only does so if `/etc/bell-slapper/email.yml` exists). The config file is readable only by root; systemd passes it to the service. Watch it work with `journalctl -u bell-slapper-email -f`.
 
+To turn it off, run `sudo systemctl disable --now bell-slapper-email` (the install script leaves it off). Turn it back on with `sudo systemctl enable --now bell-slapper-email`. If it can't log in or reach the bell, it retries after 5 seconds, doubling the wait each time up to 10 minutes.
+
 ### Which email providers work?
 
 Any provider that allows IMAP login with a username and password (or an app password). Some good, cheap options:

@@ -16,7 +16,7 @@ from imapclient import IMAPClient, SEEN
 from imapclient.exceptions import IMAPClientError
 
 IDLE_SECONDS = 300  # Re-issue IDLE well before servers or NAT routers drop the connection.
-RETRY_SECONDS = 30
+RETRY_MIN, RETRY_MAX = 5, 600  # Reconnect delay doubles after each failure, up to 10 minutes.
 DEFAULTS = {
     'email': {'port': 993, 'folder': 'INBOX'},
     'match': {'from': '', 'subject': ''},
@@ -86,18 +86,22 @@ def connect(config):
 
 
 def run(config):
+    delay = RETRY_MIN
     while True:
         try:
             with connect(config) as client:
                 log.info('Watching %s on %s.', config['email']['folder'], config['email']['host'])
+                delay = RETRY_MIN
                 while True:
                     check(client, config)
                     client.idle()
                     client.idle_check(timeout=IDLE_SECONDS)
                     client.idle_done()
         except (IMAPClientError, OSError) as e:
-            log.warning('%s; reconnecting in %d seconds.', e, RETRY_SECONDS)
-            time.sleep(RETRY_SECONDS)
+            message = e.args[0].decode(errors='replace') if e.args and isinstance(e.args[0], bytes) else e
+            log.warning('%s; reconnecting in %d seconds.', message, delay)
+            time.sleep(delay)
+            delay = min(delay * 2, RETRY_MAX)
 
 
 def main():
