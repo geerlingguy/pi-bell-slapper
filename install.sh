@@ -1,11 +1,20 @@
 #!/bin/bash
-# Installs or upgrades the Pi Bell Slapper. Run from the repo: sudo ./install.sh
+# Installs or upgrades the Pi Bell Slapper. Run from the repo: sudo ./install.sh [--defaults]
 set -euo pipefail
 
 APP_DIR=/opt/bell-slapper
 SERVICE=bell-slapper.service
 
 die() { echo "Error: $*" >&2; exit 1; }
+
+# --defaults skips prompts and uses the default choices.
+DEFAULTS=false
+for arg in "$@"; do
+  case "$arg" in
+    --defaults) DEFAULTS=true ;;
+    *) die "unknown option '$arg' (usage: sudo ./install.sh [--defaults])" ;;
+  esac
+done
 
 [ "$(id -u)" -eq 0 ] || die "run with sudo."
 cd "$(dirname "$0")"
@@ -37,7 +46,7 @@ if [ ${#cards[@]} -gt 0 ]; then
   for i in "${!cards[@]}"; do
     if [[ ${cards[$i]} == *"|USB-Audio"* ]]; then choice=$i; break; fi
   done
-  if [ ${#cards[@]} -gt 1 ] && [ -t 0 ]; then
+  if [ ${#cards[@]} -gt 1 ] && [ -t 0 ] && [ "$DEFAULTS" = false ]; then
     echo "Audio outputs:"
     for i in "${!cards[@]}"; do echo "  $((i + 1))) ${cards[$i]#*|}"; done
     read -rp "Play sounds through which output? [$((choice + 1))]: " answer

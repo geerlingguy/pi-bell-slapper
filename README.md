@@ -98,14 +98,14 @@ cd pi-bell-slapper
 sudo ./install.sh
 ```
 
-The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the default audio output (a USB sound card is preferred; if there's more than one output, it asks which to use), and starts the `bell-slapper` service.
+The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the default audio output (a USB sound card is preferred; if there's more than one output, it asks which to use), and starts the `bell-slapper` service. Add `--defaults` to skip the audio output prompt and use the default.
 
 To update to the latest version (settings and uploaded sounds are kept):
 
 ```
 cd pi-bell-slapper
 git pull
-sudo ./install.sh
+sudo ./install.sh --defaults
 ```
 
 Then visit `http://bell-slapper.local/` (or whatever your Pi's hostname is).
