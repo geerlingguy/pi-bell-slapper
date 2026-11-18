@@ -29,7 +29,12 @@ case "${VERSION_CODENAME:-}" in
 esac
 
 echo "Installing packages..."
-apt-get update -q
+# Skip refreshing package lists if this script did it in the last 10 minutes.
+stamp=/var/cache/bell-slapper-apt-update
+if [ -z "$(find "$stamp" -mmin -10 2>/dev/null)" ]; then
+  apt-get update -q
+  touch "$stamp"
+fi
 apt-get install -y -q python3 python3-rpi-lgpio ffmpeg alsa-utils
 
 echo "Installing app to $APP_DIR..."
