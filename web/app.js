@@ -75,7 +75,9 @@ $('delete').onclick = async () => {
 $('upload').onclick = async () => {
   const file = $('file').files[0];
   if (!file) return show('Choose a file first.', 'warning');
-  $('upload').disabled = true;
+  const button = $('upload');
+  button.disabled = $('file').disabled = true;
+  button.innerHTML = '<span class="spinner-border spinner-border-sm" aria-hidden="true"></span> Uploading…';
   try {
     const data = await api('POST', `/api/sounds?name=${encodeURIComponent(file.name)}`, file,
       'application/octet-stream');
@@ -86,7 +88,8 @@ $('upload').onclick = async () => {
   } catch (e) {
     show(e.message, 'danger');
   } finally {
-    $('upload').disabled = false;
+    button.disabled = $('file').disabled = false;
+    button.textContent = 'Upload';
   }
 };
 
