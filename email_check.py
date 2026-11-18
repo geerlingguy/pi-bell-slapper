@@ -1,62 +1,56 @@
 #!/usr/bin/env python3
+"""Ding the bell when an unread email matches the configured conditions."""
 
-# The email checker script.
-
-import os
-import yaml
-import logging
 import email
-import bell_slap
-import play_sound
-from random import randint
+import json
+import logging
+import os
+import urllib.request
 from time import sleep
+from urllib.error import HTTPError
+
+import yaml
 from imapclient import IMAPClient
 
-# Store where we currently are in the filesystem.
-__location__ = os.path.realpath(
-    os.path.join(os.getcwd(), os.path.dirname(__file__)))
+with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'config.yml'), encoding='utf-8') as stream:
+    config = yaml.safe_load(stream)
 
-# Attempt to read in the configuration.
-with open(os.path.join(__location__, "config.yml"), 'r') as stream:
-    try:
-        config = yaml.load(stream, Loader=yaml.FullLoader)
-    except yaml.YAMLError as exc:
-        print(exc)
 
-# Log into email server.
+def ding():
+    url = config['ding']['url']
+    if not url.startswith(('http://', 'https://')):
+        raise ValueError(f'ding.url must be http(s): {url}')
+    body = json.dumps({'count': config['ding']['count'], 'sound': config['ding']['sound']}).encode()
+    request = urllib.request.Request(url, data=body, headers={'Content-Type': 'application/json'})
+    # Retry while the ding queue is full (HTTP 429).
+    for _ in range(120):
+        try:
+            with urllib.request.urlopen(request, timeout=10):  # nosec B310
+                return
+        except HTTPError as e:
+            if e.code != 429:
+                raise
+            sleep(1)
+
+
 server = IMAPClient(config['email']['imap_host'])
 server.login(config['email']['username'], config['email']['password'])
 
-# See how many messages are in the inbox.
 select_info = server.select_folder('INBOX')
-logging.info('Messages in INBOX: %d' % select_info[b'EXISTS'])
+logging.info('Messages in INBOX: %d', select_info[b'EXISTS'])
 
-# See if there are any new messages.
+# Fetching a message marks it as seen.
 messages = server.search('UNSEEN')
-logging.info("Unread messages: %d\n" % len(messages))
+logging.info('Unread messages: %d', len(messages))
 
 from_contains = config['conditions']['from_contains']
 subject_contains = config['conditions']['subject_contains']
 
-# Process unread messages. When message is fetched, it's marked as 'seen'.
-for msgid, message_data in server.fetch(messages, ['RFC822']).items():
-    email_message = email.message_from_bytes(message_data[b'RFC822'])
-    email_from = email_message.get('From')
-    email_subject = email_message.get('Subject')
-
-    # Check if the email from address and subject match our conditions.
-    if from_contains in email_from and subject_contains in email_subject:
-        print("Found matching email: %s\n" % email_subject)
-
-        # Slap the bell.
-        if config['bell']['enable']:
-            bell_slap.slap_the_bell()
-
-        # Play the sound.
-        if config['sound']['enable']:
-            play_sound.play_the_sound(file=config['sound']['file'])
-
-        # Sleep for a few seconds between dings.
-        sleep(randint(1, 5))
+for message_data in server.fetch(messages, ['RFC822']).values():
+    message = email.message_from_bytes(message_data[b'RFC822'])
+    subject = message.get('Subject', '')
+    if from_contains in message.get('From', '') and subject_contains in subject:
+        print(f'Found matching email: {subject}')
+        ding()
 
 server.logout()

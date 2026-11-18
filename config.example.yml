@@ -11,9 +11,8 @@ conditions:
   from_contains: 'person@example.com'
   subject_contains: 'Thank you for your support!'
 
-bell:
-  enable: true
-
-sound:
-  enable: false
-  file: ding.mp3
+# Bell Slapper API (server.py) to call when a matching email arrives.
+ding:
+  url: http://localhost/api/ding
+  count: 1
+  sound: false

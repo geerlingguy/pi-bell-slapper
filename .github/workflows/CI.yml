@@ -6,6 +6,9 @@ name: CI
     branches:
       - master
 
+permissions:
+  contents: read
+
 jobs:
 
   lint:
@@ -13,17 +16,31 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
       - name: Install dependencies
-        run: pip install imapclient yamllint flake8
+        run: pip install pylint bandit yamllint imapclient pyyaml
 
-      - name: Lint code.
+      - name: Lint Python
+        run: pylint server.py email_check.py
+
+      - name: Security scan
+        run: bandit -ll server.py email_check.py
+
+      - name: Lint shell and YAML
         run: |
+          shellcheck install.sh
           yamllint .
-          flake8 --max-line-length 120 --ignore=E402
+
+      - name: Smoke test server
+        run: |
+          ./server.py --port 8080 --dry-run --data-dir /tmp/bell &
+          sleep 2
+          curl -fsS http://localhost:8080/api/status
+          curl -fsS -X POST 'http://localhost:8080/api/ding?count=2'
+          curl -fsS http://localhost:8080/ | grep -q 'Bell Control'

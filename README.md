@@ -85,29 +85,97 @@ For the current design, I use friction and gravity to hold the Pi Zero and custo
 
 The case design is derived from [@tenderlove's Analog Terminal Bell case](https://github.com/tenderlove/analog-terminal-bell/tree/master/case), and is modeled in OpenSCAD. The source files are also in the `enclosure` directory, should you like them.
 
+## How do I control the Bell Slapper?
+
+`server.py` serves a small web UI and HTTP API for slapping the bell (and optionally playing a sound) from any device on your network. It uses only the Python standard library, so there's nothing to `pip install`.
+
+On a Pi running Raspberry Pi OS Lite (Trixie or Bookworm), clone the repo and run the install script:
+
+```
+sudo apt install -y git
+git clone https://github.com/geerlingguy/pi-bell-slapper.git
+cd pi-bell-slapper
+sudo ./install.sh
+```
+
+The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the default audio output (a USB sound card is preferred; if there's more than one output, it asks which to use), and starts the `bell-slapper` service. Add `--defaults` to skip the audio output prompt and use the default.
+
+To update to the latest version (settings and uploaded sounds are kept):
+
+```
+cd pi-bell-slapper
+git pull
+sudo ./install.sh --defaults
+```
+
+Then visit `http://bell-slapper.local/` (or whatever your Pi's hostname is).
+
+Settings and uploaded sounds are stored in `/var/lib/bell-slapper`. Uploads must be WAV, AIFF, MP3, or M4A and 10 seconds or less; they're converted to 48 kHz WAV on upload, and the original file is discarded.
+
+> To test without a Pi, run `./server.py --port 8080 --dry-run`.
+
+### API
+
+The bell will never ding more than once per second. Ding requests are queued and run in order; once 10 are waiting (or running), new requests get a `429` response.
+
+| Request | Description |
+| --- | --- |
+| `GET /api/status` | Current settings, available sounds, volume, and number of queued ding requests. |
+| `POST /api/ding` | Ding the bell. Optional parameters: `count` (1-10), `interval` (1-10 seconds), `sound` (`true` to play the selected sound after each ding), `sound_name`. |
+| `PUT /api/settings` | Update `interval`, `sound`, and/or `volume` (0-100). |
+| `POST /api/sounds?name=file.mp3` | Upload a sound (raw file as the request body). |
+| `DELETE /api/sounds/NAME` | Delete a sound. |
+
+Parameters can be passed in the query string or as a JSON body. For example:
+
+```
+curl -X POST 'http://bell-slapper.local/api/ding?count=3&sound=true'
+curl -X PUT http://bell-slapper.local/api/settings -d '{"interval": 2.5}'
+curl -X POST --data-binary @tada.mp3 'http://bell-slapper.local/api/sounds?name=tada.mp3'
+```
+
+### Sound output
+
+Sounds play through the default ALSA device, which `install.sh` sets in `/etc/asound.conf`. To change the output, plug in the sound card and run `sudo ./install.sh` again.
+
+To set it by hand, find the card's name in brackets (e.g. `Device`) with `cat /proc/asound/cards`, then put this in `/etc/asound.conf` (`plug` handles any sample rate conversion the card needs):
+
+```
+pcm.!default {
+        type plug
+        slave.pcm "hw:CARD=Device,DEV=0"
+}
+
+ctl.!default {
+        type hw
+        card Device
+}
+```
+
+Verify it's working with `speaker-test -c2 -twav -l7`.
+
+### Debugging audio
+
+  1. **Is the card detected?** `aplay -l` should list your sound card. If it doesn't, check `lsusb` and `dmesg | tail` (a Zero needs a data OTG adapter or hub on the inner "USB" port, and some cards need a powered hub).
+  2. **Is it the default output?** `cat /etc/asound.conf` should point to your card's name (from `cat /proc/asound/cards`). If not, run `sudo ./install.sh` again with the card plugged in.
+  3. **Does it play?** `aplay /opt/bell-slapper/ding.wav` (default output) or `aplay -D plughw:CARD=Device /opt/bell-slapper/ding.wav` (bypasses `asound.conf`). `speaker-test -c2 -twav -l1` checks both channels.
+  4. **Is it loud enough?** Use the Volume slider under Configuration (shown if the output has a volume control), or run `alsamixer -c Device`, or `amixer -c Device scontrols` to find the control name and `amixer -c Device sset Speaker 80%` to set it. Save with `sudo alsactl store` so it survives reboots (the slider's level is saved automatically).
+  5. **Does the service play it?** Check `journalctl -u bell-slapper -f` while pressing DING + SOUND in the web UI.
+
+Replace `Device` with your card's name. If sound comes out of an HDMI monitor instead, the default output is set to `vc4hdmi`; re-run the installer and pick the USB card.
+
 ## How do I tie email notifications to the bell slapper?
 
-Well, now we're getting to the meat of it.
+I built this project to monitor an email inbox. The `email_check.py` script translates "new email arrives" into "the bell has been resoundingly slapped", by calling the API above.
 
-It's easy enough to slap a bell with your hand; there's no point in making a Raspberry Pi do it if you just want to slap the bell once or twice.
-
-I built this project to monitor an email inbox. So I wrote a Python script, `email-check.py`. That python script does all the magic of translating "new email arrives" into "the bell has been resoundingly slapped".
-
-To make this script work, you need to do two things on the Pi:
-
-  1. Copy the `config.example.yml` file to a file named `config.yml`, and modify it with the email credentials for the account to be monitored.
-  2. Make sure Pip is installed: `sudo apt install -y python3-pip`
-  3. Run `python3 -m pip install imapclient pyyaml` to install required dependencies.
+  1. Copy `config.example.yml` to `config.yml`, and modify it with the email credentials for the account to be monitored.
+  2. Install dependencies: `sudo apt install -y python3-imapclient python3-yaml`
 
 Then run `./email_check.py`, and prepare to be amazed! Or not, especially if it doesn't work.
 
-> You might also need to install Pip, if you get an error on the `python3 -m pip` command. To do that, run `sudo apt install -y python3-pip`.
-
 ### How do I continuously check the email inbox?
 
-Well now we're really getting somewhere useful!
-
-For now, I'm just using cron. Fire up the ol' crontab editor (`crontab -l`) and add the following line:
+For now, I'm just using cron. Fire up the ol' crontab editor (`crontab -e`) and add the following line:
 
 ```
 * * * * * /home/pi/pi-bell-slapper/email_check.py
@@ -118,103 +186,6 @@ Then every minute the script will run!
 > Note: If you have any errors, cron will email them to localhost (make sure you have something like `postfix` and `mailutils` installed to catch and read those emails). Other cron output goes into the syslog (check `/var/log/syslog`).
 
 If you're using a Pi like the model A+, which doesn't have built-in WiFi, and you're using a cheap USB WiFi dongle to connect to the Internet, there's a chance it will go into a sleep mode after a minute or so—follow [these directions to stop the thing from sleeping](https://www.jeffgeerling.com/blogs/jeff-geerling/edimax-ew-7811un-tenda-w311mi-wifi-raspberry-pi).
-
-## How do I also play a sound through a sound output?
-
-The bell slapper can also play a sound when the bell is slapped, so you could have any other sound triggered upon a successful notification as well.
-
-To enable this functionality, set `sound.enable` to `true` in your `config.yml` file, and provide the path to a sound file to play.
-
-Next, install the dependencies required to play sounds:
-
-```
-$ pip3 install pygame
-$ apt-get install libsdl2-mixer-2.0-0
-```
-
-You also have to tell the play_sound script the right audio device to use, so check what sound devices are present on your system:
-
-```
-$ cat /proc/asound/modules
- 1 snd_usb_audio
-```
-
-In this case, I'm using a USB sound card, and it's identified as device number `1`.
-
-Create a file with `sudo nano /etc/asound.conf` with the contents:
-
-```
-pcm.!default {
-        type hw
-        card 1
-}
-
-ctl.!default {
-        type hw
-        card 1
-}
-```
-
-Then verify it's working with:
-
-```
-$ speaker-test -c2 -twav -l7
-```
-
-You should hear some sound coming from the left and right speakers. If you do, this means the entire audio setup is working properly, and the `play_sound.py` script should work:
-
-```
-$ ./play_sound.py
-```
-
-The project comes with a default `ding.wav` file that sounds exactly like the call bell that is physically struck by the solenoid. You can use any compatible audio file, though; just edit the `file` path in `config.yml`.
-
-If sound is enabled, the sound will also play any time the `email_check.py` script detects an email matching the specified contitions.
-
-## How do I control the Bell Slapper via a Web UI?
-
-This project contains a tiny PHP web application that lets you slap the bell from anywhere you can reach the Pi (usually just on the local network). All you need is a phone, tablet, or computer with a web browser.
-
-If the hostname of the Pi is `bell-slapper.local`, just visit that URL in your browser, and voila! You won't see anything!
-
-That's because to get it working, you'll need to install PHP and Apache first:
-
-```
-# Install PHP and Apache.
-$ sudo apt update
-$ sudo apt install apache2 php php-yaml -y
-
-# Verify that PHP was installed.
-$ php -v
-PHP 7.3.31-1~deb10u1 (cli)
-```
-
-Then add an Apache VirtualHost defining the path to this project's web directory:
-
-```
-$ sudo nano /etc/apache2/sites-enabled/pi-bell-slapper.conf
-
-# Paste the following inside that file and save it:
-<VirtualHost *:80>
-    DocumentRoot "/home/pi/pi-bell-slapper/web"
-    ServerName bell-slapper.local
-    DirectoryIndex index.php
-    <Directory /home/pi/pi-bell-slapper/web>
-        Require all granted
-    </Directory>
-</VirtualHost>
-```
-
-Finally, add the Apache user to the GPIO group so it can run the bell slapper script, and then restart Apache:
-
-```
-$ sudo usermod -a -G gpio www-data
-$ sudo systemctl restart apache2
-```
-
-Now visit `bell-slapper.local` in a browser, and ding away to your heart's content!
-
-> If you need to update the hostname of the Pi, run `sudo raspi-config`, go to System Options > Hostname, and update the hostname (e.g. `bell-slapper`). Then reboot, and it should be accessible at `bell-slapper.local`.
 
 ## Were you inspired by anyone?
 

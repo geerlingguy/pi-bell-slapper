@@ -1,0 +1,17 @@
+[Unit]
+Description=Pi Bell Slapper
+After=network.target sound.target
+
+[Service]
+ExecStart=/usr/bin/python3 /opt/bell-slapper/server.py --data-dir /var/lib/bell-slapper
+DynamicUser=yes
+SupplementaryGroups=gpio audio
+StateDirectory=bell-slapper
+WorkingDirectory=/var/lib/bell-slapper
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+MemoryMax=128M
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

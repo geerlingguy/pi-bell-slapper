@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pi Bell Slapper</title>
+  <link rel="stylesheet" href="bootstrap.min.css">
+</head>
+<body>
+  <div class="container py-3">
+  <div class="row justify-content-center">
+  <div class="col-md-8 col-lg-6">
+    <h1 class="text-center mb-3">&#128276; Bell Control</h1>
+
+    <div id="alert" class="alert d-none" role="status"></div>
+
+    <div class="card mb-3">
+      <div class="card-body">
+        <h5 class="card-title">Ding the Bell!</h5>
+        <label class="form-label">Ding Count</label>
+        <div id="count" class="btn-group w-100 mb-3" role="group" aria-label="Ding count"></div>
+        <button id="ding" type="button" class="btn btn-primary btn-lg">DING</button>
+        <button id="ding-sound" type="button" class="btn btn-secondary btn-lg">DING + SOUND</button>
+      </div>
+    </div>
+
+    <div class="accordion mb-3">
+      <div class="accordion-item">
+        <h2 class="accordion-header">
+          <button id="config-toggle" class="accordion-button collapsed" type="button" aria-expanded="false"
+            aria-controls="config">Configuration</button>
+        </h2>
+        <div id="config" class="accordion-collapse collapse">
+        <div class="accordion-body">
+
+        <label for="interval" class="form-label">Ding Interval (seconds)</label>
+        <input id="interval" type="number" class="form-control" min="1" max="10" step="0.01" value="1.00">
+        <div class="form-text">Time between dings, from 1.00 to 10.00.</div>
+
+        <label for="sound" class="form-label mt-3">Sound</label>
+        <div class="input-group">
+          <select id="sound" class="form-select"></select>
+          <button id="delete" type="button" class="btn btn-outline-danger">Delete</button>
+        </div>
+
+        <div id="volume-group" class="d-none">
+          <label for="volume" class="form-label mt-3">Volume: <span id="volume-value"></span>%</label>
+          <input id="volume" type="range" class="form-range" min="0" max="100" step="5">
+        </div>
+
+        <label for="file" class="form-label mt-3">Upload a Sound</label>
+        <div class="input-group">
+          <input id="file" type="file" class="form-control" accept=".wav,.aif,.aiff,.mp3,.m4a">
+          <button id="upload" type="button" class="btn btn-outline-secondary">Upload</button>
+        </div>
+        <div class="form-text">WAV, AIFF, MP3, or M4A; 10 seconds or less.</div>
+        </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-body text-center">
+        &#128519; Made by <a href="https://www.jeffgeerling.com/">Jeff Geerling</a> · <a href="https://github.com/geerlingguy/pi-bell-slapper">Source</a>
+      </div>
+    </div>
+  </div>
+  </div>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
