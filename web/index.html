@@ -26,9 +26,10 @@
 
     <div class="card mb-3">
       <div class="card-body">
-        <h5 class="card-title">Configuration</h5>
+        <details>
+        <summary class="h5 mb-0">Configuration</summary>
 
-        <label for="interval" class="form-label">Ding Interval (seconds)</label>
+        <label for="interval" class="form-label mt-3">Ding Interval (seconds)</label>
         <input id="interval" type="number" class="form-control" min="1" max="10" step="0.01" value="1.00">
         <div class="form-text">Time between dings, from 1.00 to 10.00.</div>
 
@@ -44,6 +45,7 @@
           <button id="upload" type="button" class="btn btn-outline-secondary">Upload</button>
         </div>
         <div class="form-text">WAV, AIFF, MP3, or M4A; 10 seconds or less.</div>
+        </details>
       </div>
     </div>
 
