@@ -154,6 +154,16 @@ ctl.!default {
 
 Verify it's working with `speaker-test -c2 -twav -l7`.
 
+### Debugging audio
+
+  1. **Is the card detected?** `aplay -l` should list your sound card. If it doesn't, check `lsusb` and `dmesg | tail` (a Zero needs a data OTG adapter or hub on the inner "USB" port, and some cards need a powered hub).
+  2. **Is it the default output?** `cat /etc/asound.conf` should point to your card's name (from `cat /proc/asound/cards`). If not, run `sudo ./install.sh` again with the card plugged in.
+  3. **Does it play?** `aplay /opt/bell-slapper/ding.wav` (default output) or `aplay -D plughw:CARD=Device /opt/bell-slapper/ding.wav` (bypasses `asound.conf`). `speaker-test -c2 -twav -l1` checks both channels.
+  4. **Is it loud enough?** Run `alsamixer -c Device`, or `amixer -c Device scontrols` to find the control name and `amixer -c Device sset Speaker 80%` to set it. Save with `sudo alsactl store` so it survives reboots.
+  5. **Does the service play it?** Check `journalctl -u bell-slapper -f` while pressing DING + SOUND in the web UI.
+
+Replace `Device` with your card's name. If sound comes out of an HDMI monitor instead, the default output is set to `vc4hdmi`; re-run the installer and pick the USB card.
+
 ## How do I tie email notifications to the bell slapper?
 
 I built this project to monitor an email inbox. The `email_check.py` script translates "new email arrives" into "the bell has been resoundingly slapped", by calling the API above.
