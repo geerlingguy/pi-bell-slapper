@@ -68,9 +68,12 @@ else
 fi
 
 echo "Starting $SERVICE..."
-install -m 644 "$SERVICE" /etc/systemd/system/
-systemctl daemon-reload
-systemctl enable "$SERVICE"
+# Reloading systemd is slow on a Pi Zero, so only do it when the unit changed.
+if ! cmp -s "$SERVICE" "/etc/systemd/system/$SERVICE"; then
+  install -m 644 "$SERVICE" /etc/systemd/system/
+  systemctl daemon-reload
+fi
+systemctl is-enabled --quiet "$SERVICE" || systemctl enable --no-reload "$SERVICE"
 systemctl restart "$SERVICE"
 
 sleep 2

@@ -407,7 +407,7 @@ def main():
     static = {}
     for path, (name, content_type, cache) in STATIC.items():
         body = (ROOT / 'web' / name).read_bytes()
-        static[path] = (body, gzip.compress(body) if len(body) > 1024 else None, content_type, cache)
+        static[path] = (body, gzip.compress(body, compresslevel=6) if len(body) > 1024 else None, content_type, cache)
     Handler.app = {'bell': Bell(args.pin, args.dry_run), 'sounds': sounds,
                    'settings': Settings(args.data_dir, sounds), 'static': static}
 
