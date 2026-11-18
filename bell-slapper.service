@@ -1,0 +1,18 @@
+[Unit]
+Description=Pi Bell Slapper
+After=network.target sound.target
+
+[Service]
+User=pi
+SupplementaryGroups=gpio audio
+ExecStart=/usr/bin/python3 /home/pi/pi-bell-slapper/server.py --data-dir /var/lib/bell-slapper
+StateDirectory=bell-slapper
+WorkingDirectory=/var/lib/bell-slapper
+AmbientCapabilities=CAP_NET_BIND_SERVICE
+NoNewPrivileges=yes
+ProtectSystem=strict
+PrivateTmp=yes
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

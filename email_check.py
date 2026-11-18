@@ -3,12 +3,12 @@
 # The email checker script.
 
 import os
+import json
 import yaml
 import logging
 import email
-import bell_slap
-import play_sound
-from random import randint
+import urllib.request
+from urllib.error import HTTPError
 from time import sleep
 from imapclient import IMAPClient
 
@@ -22,6 +22,22 @@ with open(os.path.join(__location__, "config.yml"), 'r') as stream:
         config = yaml.load(stream, Loader=yaml.FullLoader)
     except yaml.YAMLError as exc:
         print(exc)
+
+
+def ding():
+    body = json.dumps({'count': config['ding']['count'], 'sound': config['ding']['sound']}).encode()
+    request = urllib.request.Request(config['ding']['url'], data=body,
+                                     headers={'Content-Type': 'application/json'})
+    # Wait for any ding already in progress (the API returns 429 while busy).
+    for _ in range(120):
+        try:
+            urllib.request.urlopen(request, timeout=10)
+            return
+        except HTTPError as e:
+            if e.code != 429:
+                raise
+            sleep(1)
+
 
 # Log into email server.
 server = IMAPClient(config['email']['imap_host'])
@@ -48,15 +64,6 @@ for msgid, message_data in server.fetch(messages, ['RFC822']).items():
     if from_contains in email_from and subject_contains in email_subject:
         print("Found matching email: %s\n" % email_subject)
 
-        # Slap the bell.
-        if config['bell']['enable']:
-            bell_slap.slap_the_bell()
-
-        # Play the sound.
-        if config['sound']['enable']:
-            play_sound.play_the_sound(file=config['sound']['file'])
-
-        # Sleep for a few seconds between dings.
-        sleep(randint(1, 5))
+        ding()
 
 server.logout()
