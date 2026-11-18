@@ -97,7 +97,7 @@ done
 
 start() {
   echo "Starting $1..."
-  systemctl is-enabled --quiet "$1" || systemctl enable --no-reload "$1"
+  systemctl is-enabled --quiet "$1" || systemctl enable --quiet "$1"
   systemctl restart "$1"
   sleep 2
   systemctl is-active --quiet "$1" || die "$1 failed to start; check: journalctl -u $1"
