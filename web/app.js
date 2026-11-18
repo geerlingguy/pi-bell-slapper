@@ -2,10 +2,43 @@ const $ = (id) => document.getElementById(id);
 
 function show(message, type = 'success') {
   const alert = $('alert');
+  alert.getAnimations().forEach((a) => a.cancel());
   alert.className = `alert alert-${type}`;
   alert.textContent = message;
   clearTimeout(show.timer);
-  show.timer = setTimeout(() => alert.classList.add('d-none'), 4000);
+  show.timer = setTimeout(() => hide(alert), 4000);
+}
+
+// Fade out, then collapse so the page slides up.
+async function hide(el) {
+  const s = getComputedStyle(el);
+  try {
+    await el.animate({ opacity: [1, 0] }, { duration: 300, fill: 'forwards' }).finished;
+    await el.animate({
+      height: [s.height, '0px'],
+      paddingTop: [s.paddingTop, '0px'],
+      paddingBottom: [s.paddingBottom, '0px'],
+      marginBottom: [s.marginBottom, '0px'],
+      borderWidth: [s.borderTopWidth, '0px'],
+    }, { duration: 300, easing: 'ease', fill: 'forwards' }).finished;
+  } catch {
+    return; // A new message replaced this one.
+  }
+  el.classList.add('d-none');
+  el.getAnimations().forEach((a) => a.cancel());
+}
+
+// Slide an element open or closed.
+function slide(el, open) {
+  el.getAnimations().forEach((a) => a.cancel());
+  el.classList.add('show');
+  const height = `${el.scrollHeight}px`;
+  el.style.overflow = 'hidden';
+  el.animate({ height: open ? ['0px', height] : [height, '0px'] }, { duration: 200, easing: 'ease' })
+    .onfinish = () => {
+      el.style.overflow = '';
+      el.classList.toggle('show', open);
+    };
 }
 
 async function api(method, path, body, type = 'application/json') {
@@ -38,8 +71,10 @@ async function ding(sound) {
   const count = Number(document.querySelector('[name=count]:checked').value);
   try {
     const { position } = await api('POST', '/api/ding', { count, sound });
-    const what = `${count} ding${count > 1 ? 's' : ''}${sound ? ' with sound' : ''}`;
-    show(position > 1 ? `Queued ${what} (#${position} in line).` : `Dinging ${what}!`);
+    const extra = sound ? ' with sound' : '';
+    show(position > 1
+      ? `Queued ${count} ding${count > 1 ? 's' : ''}${extra} (#${position} in line).`
+      : `Dinging ${count > 1 ? `${count} times` : 'once'}${extra}!`);
   } catch (e) {
     show(e.message, 'warning');
   }
@@ -62,7 +97,8 @@ for (let i = 1; i <= 10; i++) {
 }
 
 $('config-toggle').onclick = () => {
-  const open = $('config').classList.toggle('show');
+  const open = $('config-toggle').classList.contains('collapsed');
+  slide($('config'), open);
   $('config-toggle').classList.toggle('collapsed', !open);
   $('config-toggle').setAttribute('aria-expanded', open);
 };
