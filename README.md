@@ -166,7 +166,7 @@ Replace `Device` with your card's name. If sound comes out of an HDMI monitor in
 
 ## How do I ring the bell for new emails?
 
-This is what the bell was built for: ringing during a radiothon whenever an online donation comes in. Our donor database (DonorPerfect) can send an email for each new gift using a "SmartAction", so the bell watches a mailbox for those emails. That avoids giving the Pi an API key to the whole donor database, and works with any system that can send an email.
+This is what the bell was built for: ringing during a radiothon whenever an online donation comes in. Most donation platforms can send an email notification for each new gift, so the bell watches a mailbox for those emails. That avoids giving the Pi an API key to the whole donor database, and works with any system that can send an email.
 
 `email_check.py` runs as the `bell-slapper-email` service. It stays connected to the mailbox using [IMAP IDLE](https://en.wikipedia.org/wiki/IMAP_IDLE), so the server tells it about new mail within a second or two, and it does a DING + SOUND for each unread email matching the configured From and Subject, then marks that email read. If the mailbox or the bell is unreachable, it keeps retrying, and emails stay unread until the bell has rung for them.
 

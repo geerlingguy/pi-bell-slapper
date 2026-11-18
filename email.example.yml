@@ -12,7 +12,7 @@ email:
 # Ding for unread emails whose From and Subject contain this text.
 # Case-insensitive; blank matches anything.
 match:
-  from: donorperfect
+  from: donations@example.com
   subject: ''
 
 # What to do for each matching email.
