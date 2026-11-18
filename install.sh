@@ -29,11 +29,9 @@ case "${VERSION_CODENAME:-}" in
 esac
 
 echo "Installing packages..."
-# Skip refreshing package lists if this script did it in the last 10 minutes.
-stamp=/var/cache/bell-slapper-apt-update
-if [ -z "$(find "$stamp" -mmin -10 2>/dev/null)" ]; then
+# Skip refreshing package lists if they changed in the last 10 minutes (same check as Ansible's apt module).
+if [ -z "$(find /var/lib/apt/lists -maxdepth 0 -mmin -10)" ]; then
   apt-get update -q
-  touch "$stamp"
 fi
 apt-get install -y -q python3 python3-rpi-lgpio ffmpeg alsa-utils
 
