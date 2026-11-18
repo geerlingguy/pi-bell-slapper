@@ -213,6 +213,7 @@ def parse_bool(value):
 
 class Handler(BaseHTTPRequestHandler):
     server_version = 'BellSlapper'
+    timeout = 30  # Drop stalled clients so they can't pile up threads.
     app = {}  # Set in main().
     url_path = ''
     query = {}
