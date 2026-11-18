@@ -4,6 +4,7 @@
 import argparse
 import gzip
 import json
+import queue
 import re
 import shutil
 import subprocess
@@ -20,8 +21,9 @@ ROOT = Path(__file__).resolve().parent
 MIN_INTERVAL = 1.0  # Hard rate limit: never more than one ding per second.
 MAX_INTERVAL = 10.0
 MAX_COUNT = 10
+MAX_QUEUE = 10  # Ding requests waiting or in progress.
 PULSE = 0.01  # Solenoid on-time per ding, in seconds.
-SOUND_DELAY = 1.0  # Pause between the last ding and the sound.
+SOUND_DELAY = 1.0  # Pause between each ding and its sound.
 MAX_SOUND_SECONDS = 10.0
 MAX_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_SOUNDS = 50
@@ -54,6 +56,7 @@ class Bell:
     def __init__(self, pin, dry_run):
         self.pin = pin
         self.lock = threading.Lock()
+        self.queue = queue.Queue()
         self.last = 0.0
         self.gpio = None
         if not dry_run:
@@ -62,31 +65,38 @@ class Bell:
             GPIO.setmode(GPIO.BCM)
             GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
             self.gpio = GPIO
+        threading.Thread(target=self._worker, daemon=True).start()
 
-    def busy(self):
-        return self.lock.locked()
+    def pending(self):
+        return self.queue.unfinished_tasks
 
     def start(self, count, interval, sound):
-        """Run a ding sequence in the background. Returns False if one is already running."""
-        if not self.lock.acquire(blocking=False):
-            return False
-        threading.Thread(target=self._run, args=(count, interval, sound), daemon=True).start()
-        return True
+        """Queue a ding sequence. Returns its queue position, or 0 if the queue is full."""
+        with self.lock:
+            if self.pending() >= MAX_QUEUE:
+                return 0
+            self.queue.put((count, interval, sound))
+            return self.pending()
+
+    def _worker(self):
+        while True:
+            job = self.queue.get()
+            try:
+                self._run(*job)
+            except Exception as e:
+                print(f'Ding failed: {e}', flush=True)
+            finally:
+                self.queue.task_done()
 
     def _run(self, count, interval, sound):
-        try:
-            for i in range(count):
-                gap = max(MIN_INTERVAL, interval) if i else MIN_INTERVAL
-                time.sleep(max(0.0, self.last + gap - time.monotonic()))
-                self._slap()
+        for i in range(count):
+            gap = max(MIN_INTERVAL, interval) if i else MIN_INTERVAL
+            time.sleep(max(0.0, self.last + gap - time.monotonic()))
+            self._slap()
             if sound:
                 time.sleep(SOUND_DELAY)
                 subprocess.run(['aplay', '-q', str(sound)], timeout=MAX_SOUND_SECONDS + 5,
                                stdin=subprocess.DEVNULL)
-        except Exception as e:
-            print(f'Ding failed: {e}', flush=True)
-        finally:
-            self.lock.release()
 
     def _slap(self):
         if self.gpio:
@@ -229,7 +239,7 @@ class Handler(BaseHTTPRequestHandler):
     def route_get(self):
         app = self.app
         if self.url_path == '/api/status':
-            return self.send_json({'busy': app['bell'].busy(), 'settings': app['settings'].get(),
+            return self.send_json({'queued': app['bell'].pending(), 'settings': app['settings'].get(),
                                    'sounds': app['sounds'].list()})
         if self.url_path in STATIC:
             return self.send_static(self.url_path)
@@ -254,15 +264,17 @@ class Handler(BaseHTTPRequestHandler):
                 sound = app['sounds'].path(params.get('sound_name', settings['sound']))
                 if not sound:
                     raise ApiError(400, 'No sound available. Upload one first.')
-            if not app['bell'].start(int(count), interval, sound):
-                raise ApiError(429, 'The bell is busy. Try again in a moment.')
-            return self.send_json({'count': int(count), 'interval': interval, 'sound': bool(sound)}, 202)
+            position = app['bell'].start(int(count), interval, sound)
+            if not position:
+                raise ApiError(429, f'The ding queue is full ({MAX_QUEUE}). Try again in a moment.')
+            return self.send_json({'count': int(count), 'interval': interval, 'sound': bool(sound),
+                                   'position': position}, 202)
         if method in ('POST', 'PUT') and path == '/api/settings':
             return self.send_json(app['settings'].update(self.params()))
         if method == 'POST' and path == '/api/sounds':
             return self.upload()
         if method == 'DELETE' and path.startswith('/api/sounds/'):
-            app['sounds'].delete(path.removeprefix('/api/sounds/'))
+            app['sounds'].delete(path[len('/api/sounds/'):])
             return self.send_json({'sounds': app['sounds'].list(), 'settings': app['settings'].get()})
         raise ApiError(404, 'Not found.')
 

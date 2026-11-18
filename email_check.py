@@ -28,7 +28,7 @@ def ding():
     body = json.dumps({'count': config['ding']['count'], 'sound': config['ding']['sound']}).encode()
     request = urllib.request.Request(config['ding']['url'], data=body,
                                      headers={'Content-Type': 'application/json'})
-    # Wait for any ding already in progress (the API returns 429 while busy).
+    # Retry while the ding queue is full (HTTP 429).
     for _ in range(120):
         try:
             urllib.request.urlopen(request, timeout=10)

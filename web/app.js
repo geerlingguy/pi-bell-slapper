@@ -32,8 +32,9 @@ function render(data) {
 async function ding(sound) {
   const count = Number(document.querySelector('[name=count]:checked').value);
   try {
-    await api('POST', '/api/ding', { count, sound });
-    show(`Dinging ${count} time${count > 1 ? 's' : ''}${sound ? ' with sound' : ''}!`);
+    const { position } = await api('POST', '/api/ding', { count, sound });
+    const what = `${count} ding${count > 1 ? 's' : ''}${sound ? ' with sound' : ''}`;
+    show(position > 1 ? `Queued ${what} (#${position} in line).` : `Dinging ${what}!`);
   } catch (e) {
     show(e.message, 'warning');
   }

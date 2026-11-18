@@ -96,7 +96,7 @@ sudo apt install -y git python3-rpi-lgpio ffmpeg alsa-utils
 git clone https://github.com/geerlingguy/pi-bell-slapper.git ~/pi-bell-slapper
 ```
 
-> On older Pi OS releases, `python3-rpi.gpio` works too.
+> On Pi OS Buster, install `python3-rpi.gpio` instead of `python3-rpi-lgpio`.
 
 Install and start the systemd service (edit `User=` and the paths in `bell-slapper.service` if you're not using the `pi` user):
 
@@ -114,12 +114,12 @@ Settings and uploaded sounds are stored in `/var/lib/bell-slapper`. Uploads must
 
 ### API
 
-The bell will never ding more than once per second. While a ding sequence is running, new ding requests get a `429` response.
+The bell will never ding more than once per second. Ding requests are queued and run in order; once 10 are waiting (or running), new requests get a `429` response.
 
 | Request | Description |
 | --- | --- |
-| `GET /api/status` | Current settings, available sounds, and whether the bell is busy. |
-| `POST /api/ding` | Ding the bell. Optional parameters: `count` (1-10), `interval` (1-10 seconds), `sound` (`true` to play the selected sound after the last ding), `sound_name`. |
+| `GET /api/status` | Current settings, available sounds, and number of queued ding requests. |
+| `POST /api/ding` | Ding the bell. Optional parameters: `count` (1-10), `interval` (1-10 seconds), `sound` (`true` to play the selected sound after each ding), `sound_name`. |
 | `PUT /api/settings` | Update `interval` and/or `sound`. |
 | `POST /api/sounds?name=file.mp3` | Upload a sound (raw file as the request body). |
 | `DELETE /api/sounds/NAME` | Delete a sound. |
