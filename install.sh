@@ -28,12 +28,16 @@ case "${VERSION_CODENAME:-}" in
   *) die "Raspberry Pi OS ${VERSION_CODENAME:-unknown} is not supported (use Trixie or Bookworm)." ;;
 esac
 
-echo "Installing packages..."
-# Skip refreshing package lists if they changed in the last 10 minutes (same check as Ansible's apt module).
-if [ -z "$(find /var/lib/apt/lists -maxdepth 0 -mmin -10)" ]; then
-  apt-get update -q
+PACKAGES=(python3 python3-rpi-lgpio ffmpeg alsa-utils)
+installed=$(dpkg-query -W -f='${db:Status-Abbrev}\n' "${PACKAGES[@]}" 2>/dev/null | grep -c '^ii' || true)
+if [ "$installed" -ne ${#PACKAGES[@]} ]; then
+  echo "Installing packages..."
+  # Skip refreshing package lists if they changed in the last 10 minutes (same check as Ansible's apt module).
+  if [ -z "$(find /var/lib/apt/lists -maxdepth 0 -mmin -10)" ]; then
+    apt-get update -q
+  fi
+  apt-get install -y -q "${PACKAGES[@]}"
 fi
-apt-get install -y -q python3 python3-rpi-lgpio ffmpeg alsa-utils
 
 echo "Installing app to $APP_DIR..."
 rm -rf "$APP_DIR"
