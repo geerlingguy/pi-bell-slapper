@@ -39,6 +39,11 @@
           <button id="delete" type="button" class="btn btn-outline-danger">Delete</button>
         </div>
 
+        <div id="volume-group" class="d-none">
+          <label for="volume" class="form-label mt-3">Volume: <span id="volume-value"></span>%</label>
+          <input id="volume" type="range" class="form-range" min="0" max="100" step="5">
+        </div>
+
         <label for="file" class="form-label mt-3">Upload a Sound</label>
         <div class="input-group">
           <input id="file" type="file" class="form-control" accept=".wav,.aif,.aiff,.mp3,.m4a">

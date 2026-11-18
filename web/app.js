@@ -23,6 +23,11 @@ function render(data) {
   if (data.sounds) {
     $('sound').replaceChildren(...data.sounds.map((name) => new Option(name, name)));
   }
+  if ('volume' in data) {
+    $('volume-group').classList.toggle('d-none', data.volume === null);
+    $('volume').value = data.volume ?? 0;
+    $('volume-value').textContent = $('volume').value;
+  }
   if (data.settings) {
     $('sound').value = data.settings.sound;
     $('interval').value = data.settings.interval.toFixed(2);
@@ -60,6 +65,8 @@ $('ding').onclick = () => ding(false);
 $('ding-sound').onclick = () => ding(true);
 $('interval').onchange = () => save({ interval: $('interval').value });
 $('sound').onchange = () => save({ sound: $('sound').value });
+$('volume').oninput = () => { $('volume-value').textContent = $('volume').value; };
+$('volume').onchange = () => save({ volume: $('volume').value });
 
 $('delete').onclick = async () => {
   const name = $('sound').value;

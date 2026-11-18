@@ -165,6 +165,38 @@ class Sounds:
         return name
 
 
+def amixer(*args):
+    """Run amixer on the default ALSA card; returns stdout, or None if it fails."""
+    try:
+        return subprocess.run(['amixer', *args], capture_output=True, text=True, timeout=5,
+                              check=True).stdout
+    except (OSError, subprocess.SubprocessError):
+        return None
+
+
+def mixer_control():
+    """Name of the first playback volume control, if the card has one."""
+    name = None
+    for line in (amixer('scontents') or '').splitlines():
+        if line.startswith('Simple mixer control'):
+            name = line.split("'")[1]
+        elif name and 'Capabilities:' in line and 'pvolume' in line:
+            return name
+    return None
+
+
+def get_volume():
+    control = mixer_control()
+    match = re.search(r'\[(\d+)%\]', amixer('-M', 'sget', control) or '') if control else None
+    return int(match.group(1)) if match else None
+
+
+def set_volume(percent):
+    control = mixer_control()
+    if not control or amixer('-q', '-M', 'sset', control, f'{percent}%') is None:
+        raise ApiError(400, 'The audio output has no volume control.')
+
+
 class Settings:
     def __init__(self, data_dir, sounds):
         self.file = data_dir / 'settings.json'
@@ -172,9 +204,15 @@ class Settings:
         self.lock = threading.Lock()
         self.data = {'interval': 1.0, 'sound': 'ding'}
         try:
-            self.update(json.loads(self.file.read_text()))
-        except (OSError, ValueError, ApiError):
-            pass
+            saved = json.loads(self.file.read_text())
+        except (OSError, ValueError):
+            saved = {}
+        for key in ('interval', 'sound', 'volume'):
+            if key in saved:
+                try:
+                    self.update({key: saved[key]})
+                except ApiError:
+                    pass
 
     def get(self):
         if not self.sounds.path(self.data['sound']):
@@ -189,11 +227,19 @@ class Settings:
             if not self.sounds.path(params['sound']):
                 raise ApiError(400, 'Unknown sound.')
             new['sound'] = params['sound']
+        if 'volume' in params:
+            volume = params['volume']
+            if not str(volume).isdigit() or not 0 <= int(volume) <= 100:
+                raise ApiError(400, 'Volume must be between 0 and 100.')
+            new['volume'] = int(volume)
         with self.lock:
             self.data.update(new)
             tmp = self.file.with_suffix('.tmp')
             tmp.write_text(json.dumps(self.data))
             tmp.replace(self.file)
+        # Saved first, so the level is kept even if the card is unplugged right now.
+        if 'volume' in new:
+            set_volume(new['volume'])
         return self.get()
 
 
@@ -245,7 +291,7 @@ class Handler(BaseHTTPRequestHandler):
         app = self.app
         if self.url_path == '/api/status':
             return self.send_json({'queued': app['bell'].pending(), 'settings': app['settings'].get(),
-                                   'sounds': app['sounds'].list()})
+                                   'sounds': app['sounds'].list(), 'volume': get_volume()})
         if self.url_path in STATIC:
             return self.send_static(self.url_path)
         raise ApiError(404, 'Not found.')

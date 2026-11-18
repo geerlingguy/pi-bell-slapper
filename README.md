@@ -120,9 +120,9 @@ The bell will never ding more than once per second. Ding requests are queued and
 
 | Request | Description |
 | --- | --- |
-| `GET /api/status` | Current settings, available sounds, and number of queued ding requests. |
+| `GET /api/status` | Current settings, available sounds, volume, and number of queued ding requests. |
 | `POST /api/ding` | Ding the bell. Optional parameters: `count` (1-10), `interval` (1-10 seconds), `sound` (`true` to play the selected sound after each ding), `sound_name`. |
-| `PUT /api/settings` | Update `interval` and/or `sound`. |
+| `PUT /api/settings` | Update `interval`, `sound`, and/or `volume` (0-100). |
 | `POST /api/sounds?name=file.mp3` | Upload a sound (raw file as the request body). |
 | `DELETE /api/sounds/NAME` | Delete a sound. |
 
@@ -159,7 +159,7 @@ Verify it's working with `speaker-test -c2 -twav -l7`.
   1. **Is the card detected?** `aplay -l` should list your sound card. If it doesn't, check `lsusb` and `dmesg | tail` (a Zero needs a data OTG adapter or hub on the inner "USB" port, and some cards need a powered hub).
   2. **Is it the default output?** `cat /etc/asound.conf` should point to your card's name (from `cat /proc/asound/cards`). If not, run `sudo ./install.sh` again with the card plugged in.
   3. **Does it play?** `aplay /opt/bell-slapper/ding.wav` (default output) or `aplay -D plughw:CARD=Device /opt/bell-slapper/ding.wav` (bypasses `asound.conf`). `speaker-test -c2 -twav -l1` checks both channels.
-  4. **Is it loud enough?** Run `alsamixer -c Device`, or `amixer -c Device scontrols` to find the control name and `amixer -c Device sset Speaker 80%` to set it. Save with `sudo alsactl store` so it survives reboots.
+  4. **Is it loud enough?** Use the Volume slider under Configuration (shown if the output has a volume control), or run `alsamixer -c Device`, or `amixer -c Device scontrols` to find the control name and `amixer -c Device sset Speaker 80%` to set it. Save with `sudo alsactl store` so it survives reboots (the slider's level is saved automatically).
   5. **Does the service play it?** Check `journalctl -u bell-slapper -f` while pressing DING + SOUND in the web UI.
 
 Replace `Device` with your card's name. If sound comes out of an HDMI monitor instead, the default output is set to `vc4hdmi`; re-run the installer and pick the USB card.
