@@ -61,6 +61,11 @@ for (let i = 1; i <= 10; i++) {
     `<label class="btn btn-outline-primary px-0" for="count${i}">${i}</label>`);
 }
 
+$('config-toggle').onclick = () => {
+  const open = $('config').classList.toggle('show');
+  $('config-toggle').classList.toggle('collapsed', !open);
+  $('config-toggle').setAttribute('aria-expanded', open);
+};
 $('ding').onclick = () => ding(false);
 $('ding-sound').onclick = () => ding(true);
 $('interval').onchange = () => save({ interval: $('interval').value });
