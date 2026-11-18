@@ -1,0 +1,21 @@
+---
+# Copy to /etc/bell-slapper/email.yml and run: sudo ./install.sh
+
+# IMAP mailbox to watch. Use a mailbox dedicated to the bell.
+email:
+  host: imap.purelymail.com
+  port: 993
+  username: bell@example.com
+  password: your_password
+  folder: INBOX
+
+# Ding for unread emails whose From and Subject contain this text.
+# Case-insensitive; blank matches anything.
+match:
+  from: donations@example.com
+  subject: ''
+
+# What to do for each matching email.
+ding:
+  count: 1
+  sound: true

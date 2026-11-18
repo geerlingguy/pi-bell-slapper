@@ -4,6 +4,8 @@ set -euo pipefail
 
 APP_DIR=/opt/bell-slapper
 SERVICE=bell-slapper.service
+EMAIL_SERVICE=bell-slapper-email.service
+EMAIL_CONFIG=/etc/bell-slapper/email.yml
 
 die() { echo "Error: $*" >&2; exit 1; }
 
@@ -28,7 +30,7 @@ case "${VERSION_CODENAME:-}" in
   *) die "Raspberry Pi OS ${VERSION_CODENAME:-unknown} is not supported (use Trixie or Bookworm)." ;;
 esac
 
-PACKAGES=(python3 python3-rpi-lgpio ffmpeg alsa-utils)
+PACKAGES=(python3 python3-rpi-lgpio ffmpeg alsa-utils python3-imapclient python3-yaml)
 installed=$(dpkg-query -W -f='${db:Status-Abbrev}\n' "${PACKAGES[@]}" 2>/dev/null | grep -c '^ii' || true)
 if [ "$installed" -ne ${#PACKAGES[@]} ]; then
   echo "Installing packages..."
@@ -42,7 +44,7 @@ fi
 echo "Installing app to $APP_DIR..."
 rm -rf "$APP_DIR"
 install -d "$APP_DIR/web"
-install -m 755 server.py "$APP_DIR/"
+install -m 755 server.py email_check.py "$APP_DIR/"
 install -m 644 ding.wav "$APP_DIR/"
 install -m 644 web/* "$APP_DIR/web/"
 
@@ -83,15 +85,29 @@ else
   echo "Warning: no sound cards found; sounds won't play." >&2
 fi
 
-echo "Starting $SERVICE..."
-# Reloading systemd is slow on a Pi Zero, so only do it when the unit changed.
-if ! cmp -s "$SERVICE" "/etc/systemd/system/$SERVICE"; then
-  install -m 644 "$SERVICE" /etc/systemd/system/
-  systemctl daemon-reload
-fi
-systemctl is-enabled --quiet "$SERVICE" || systemctl enable --no-reload "$SERVICE"
-systemctl restart "$SERVICE"
+# Reloading systemd is slow on a Pi Zero, so only do it when a unit changed.
+reload=false
+for unit in "$SERVICE" "$EMAIL_SERVICE"; do
+  if ! cmp -s "$unit" "/etc/systemd/system/$unit"; then
+    install -m 644 "$unit" /etc/systemd/system/
+    reload=true
+  fi
+done
+[ "$reload" = false ] || systemctl daemon-reload
 
-sleep 2
-systemctl is-active --quiet "$SERVICE" || die "service failed to start; check: journalctl -u $SERVICE"
+start() {
+  echo "Starting $1..."
+  systemctl is-enabled --quiet "$1" || systemctl enable --no-reload "$1"
+  systemctl restart "$1"
+  sleep 2
+  systemctl is-active --quiet "$1" || die "$1 failed to start; check: journalctl -u $1"
+}
+
+start "$SERVICE"
+if [ -f "$EMAIL_CONFIG" ]; then
+  chmod 600 "$EMAIL_CONFIG"
+  start "$EMAIL_SERVICE"
+else
+  echo "To ring the bell for emails, copy email.example.yml to $EMAIL_CONFIG, edit it, and run this again."
+fi
 echo "Done! Visit http://$(hostname).local/"
