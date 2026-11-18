@@ -60,7 +60,7 @@ class Bell:
         self.last = 0.0
         self.gpio = None
         if not dry_run:
-            import RPi.GPIO as GPIO
+            from RPi import GPIO  # pylint: disable=import-error,import-outside-toplevel
             GPIO.setwarnings(False)
             GPIO.setmode(GPIO.BCM)
             GPIO.setup(pin, GPIO.OUT, initial=GPIO.LOW)
@@ -83,7 +83,7 @@ class Bell:
             job = self.queue.get()
             try:
                 self._run(*job)
-            except Exception as e:
+            except Exception as e:  # pylint: disable=broad-exception-caught
                 print(f'Ding failed: {e}', flush=True)
             finally:
                 self.queue.task_done()
@@ -96,7 +96,7 @@ class Bell:
             if sound:
                 time.sleep(SOUND_DELAY)
                 subprocess.run(['aplay', '-q', str(sound)], timeout=MAX_SOUND_SECONDS + 5,
-                               stdin=subprocess.DEVNULL)
+                               stdin=subprocess.DEVNULL, check=False)
 
     def _slap(self):
         if self.gpio:
@@ -158,7 +158,7 @@ class Sounds:
                 with wave.open(str(out)) as w:
                     seconds = w.getnframes() / w.getframerate()
             except (subprocess.SubprocessError, OSError, wave.Error, EOFError, ZeroDivisionError):
-                raise ApiError(400, 'Could not read audio from that file.')
+                raise ApiError(400, 'Could not read audio from that file.') from None
             if seconds <= 0 or seconds > MAX_SOUND_SECONDS:
                 raise ApiError(400, f'Sound must be {MAX_SOUND_SECONDS:g} seconds or less.')
             out.replace(self.dir / f'{name}.wav')
@@ -213,8 +213,11 @@ def parse_bool(value):
 
 class Handler(BaseHTTPRequestHandler):
     server_version = 'BellSlapper'
-    app = None  # Set in main().
+    app = {}  # Set in main().
+    url_path = ''
+    query = {}
 
+    # pylint: disable=invalid-name
     def do_GET(self):
         self.handle_request(self.route_get)
 
@@ -227,6 +230,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_DELETE(self):
         self.handle_request(self.route_write)
 
+    # pylint: enable=invalid-name
     def handle_request(self, route):
         url = urlsplit(self.path)
         self.url_path = url.path
@@ -297,7 +301,7 @@ class Handler(BaseHTTPRequestHandler):
         try:
             return int(self.headers.get('Content-Length', 0))
         except ValueError:
-            raise ApiError(400, 'Invalid Content-Length.')
+            raise ApiError(400, 'Invalid Content-Length.') from None
 
     def params(self):
         """Query string parameters, overridden by a JSON body if present."""
@@ -310,7 +314,7 @@ class Handler(BaseHTTPRequestHandler):
             try:
                 body = json.loads(self.rfile.read(length))
             except ValueError:
-                raise ApiError(400, 'Body must be JSON.')
+                raise ApiError(400, 'Body must be JSON.') from None
             if not isinstance(body, dict):
                 raise ApiError(400, 'Body must be a JSON object.')
             params.update(body)
@@ -343,7 +347,8 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     parser = argparse.ArgumentParser(description='Pi Bell Slapper web UI and API.')
-    parser.add_argument('--host', default='0.0.0.0')
+    # Listen on all interfaces; this is a LAN service.
+    parser.add_argument('--host', default='0.0.0.0')  # nosec B104
     parser.add_argument('--port', type=int, default=80)
     parser.add_argument('--pin', type=int, default=4, help='BCM GPIO pin driving the solenoid')
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'data', help='Settings and uploaded sounds')

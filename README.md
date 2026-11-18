@@ -89,22 +89,16 @@ The case design is derived from [@tenderlove's Analog Terminal Bell case](https:
 
 `server.py` serves a small web UI and HTTP API for slapping the bell (and optionally playing a sound) from any device on your network. It uses only the Python standard library, so there's nothing to `pip install`.
 
-Install the system dependencies (`ffmpeg` is used to validate and convert uploaded sounds; `aplay` plays them):
+On a Pi running Raspberry Pi OS Lite (Trixie or Bookworm), clone the repo and run the install script:
 
 ```
-sudo apt install -y git python3-rpi-lgpio ffmpeg alsa-utils
-git clone https://github.com/geerlingguy/pi-bell-slapper.git ~/pi-bell-slapper
+sudo apt install -y git
+git clone https://github.com/geerlingguy/pi-bell-slapper.git
+cd pi-bell-slapper
+sudo ./install.sh
 ```
 
-> On Pi OS Buster, install `python3-rpi.gpio` instead of `python3-rpi-lgpio`.
-
-Install and start the systemd service (edit `User=` and the paths in `bell-slapper.service` if you're not using the `pi` user):
-
-```
-sudo cp ~/pi-bell-slapper/bell-slapper.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now bell-slapper
-```
+The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the first USB sound card as the default audio output (if `/etc/asound.conf` doesn't exist yet), and starts the `bell-slapper` service. Run it again after a `git pull` to upgrade.
 
 Then visit `http://bell-slapper.local/` (or whatever your Pi's hostname is).
 
@@ -141,7 +135,7 @@ $ cat /proc/asound/modules
  1 snd_usb_audio
 ```
 
-Then create `/etc/asound.conf` to make it the default (`plug` handles any sample rate conversion the card needs):
+The install script sets this up automatically. To do it by hand, create `/etc/asound.conf` to make it the default (`plug` handles any sample rate conversion the card needs):
 
 ```
 pcm.!default {
