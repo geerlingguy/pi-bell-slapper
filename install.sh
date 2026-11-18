@@ -30,14 +30,32 @@ install -m 755 server.py "$APP_DIR/"
 install -m 644 ding.wav "$APP_DIR/"
 install -m 644 web/* "$APP_DIR/web/"
 
-# Default to the first USB sound card, if there is one and ALSA isn't configured yet.
-card=$(awk '$2 == "snd_usb_audio" {print $1; exit}' /proc/asound/modules 2>/dev/null || true)
-if [ -n "$card" ] && [ ! -f /etc/asound.conf ]; then
-  echo "Setting USB sound card $card as the default audio output..."
+# Choose the default audio output, preferring USB; ask if there's more than one.
+mapfile -t cards < <(sed -n 's/^ *[0-9]* \[\([^ ]*\) *\]: \(.*\)$/\1|\2/p' /proc/asound/cards 2>/dev/null)
+if [ ${#cards[@]} -gt 0 ]; then
+  choice=0
+  for i in "${!cards[@]}"; do
+    if [[ ${cards[$i]} == *"|USB-Audio"* ]]; then choice=$i; break; fi
+  done
+  if [ ${#cards[@]} -gt 1 ] && [ -t 0 ]; then
+    echo "Audio outputs:"
+    for i in "${!cards[@]}"; do echo "  $((i + 1))) ${cards[$i]#*|}"; done
+    read -rp "Play sounds through which output? [$((choice + 1))]: " answer
+    if [[ $answer =~ ^[0-9]+$ ]] && [ "$answer" -ge 1 ] && [ "$answer" -le ${#cards[@]} ]; then
+      choice=$((answer - 1))
+    fi
+  fi
+  card=${cards[$choice]%%|*}
+  echo "Using audio output: ${cards[$choice]#*|}"
+
+  if [ -f /etc/asound.conf ] && ! grep -q 'pi-bell-slapper' /etc/asound.conf; then
+    cp /etc/asound.conf "/etc/asound-backup-$(date +%F).conf"
+  fi
   cat > /etc/asound.conf <<EOF
+# Written by pi-bell-slapper install.sh.
 pcm.!default {
         type plug
-        slave.pcm "hw:$card,0"
+        slave.pcm "hw:CARD=$card,DEV=0"
 }
 
 ctl.!default {
@@ -45,6 +63,8 @@ ctl.!default {
         card $card
 }
 EOF
+else
+  echo "Warning: no sound cards found; sounds won't play." >&2
 fi
 
 echo "Starting $SERVICE..."

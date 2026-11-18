@@ -98,7 +98,7 @@ cd pi-bell-slapper
 sudo ./install.sh
 ```
 
-The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the first USB sound card as the default audio output (if `/etc/asound.conf` doesn't exist yet), and starts the `bell-slapper` service.
+The script installs the required packages, copies the app to `/opt/bell-slapper`, sets the default audio output (a USB sound card is preferred; if there's more than one output, it asks which to use), and starts the `bell-slapper` service.
 
 To update to the latest version (settings and uploaded sounds are kept):
 
@@ -136,24 +136,19 @@ curl -X POST --data-binary @tada.mp3 'http://bell-slapper.local/api/sounds?name=
 
 ### Sound output
 
-Sounds play through the default ALSA device. If you're using a USB sound card, find its card number:
+Sounds play through the default ALSA device, which `install.sh` sets in `/etc/asound.conf`. To change the output, plug in the sound card and run `sudo ./install.sh` again.
 
-```
-$ cat /proc/asound/modules
- 1 snd_usb_audio
-```
-
-The install script sets this up automatically. To do it by hand, create `/etc/asound.conf` to make it the default (`plug` handles any sample rate conversion the card needs):
+To set it by hand, find the card's name in brackets (e.g. `Device`) with `cat /proc/asound/cards`, then put this in `/etc/asound.conf` (`plug` handles any sample rate conversion the card needs):
 
 ```
 pcm.!default {
         type plug
-        slave.pcm "hw:1,0"
+        slave.pcm "hw:CARD=Device,DEV=0"
 }
 
 ctl.!default {
         type hw
-        card 1
+        card Device
 }
 ```
 
