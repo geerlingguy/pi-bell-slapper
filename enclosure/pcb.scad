@@ -111,6 +111,18 @@ module PCBLid(top_thickness, wall_thickness) {
   }
 }
 
+// Rounded rectangular hole through a wall centered at y, from height z up.
+module WallCutout(x, y, thickness, z, width, height, radius) {
+  translate([x, y, z])
+    rotate([90, 0, 0])
+    color("blue")
+    // Add 1 so it looks nice in preview
+    linear_extrude(thickness + 1, center = true)
+    translate([-width / 2, 0])
+    offset(r = radius) offset(delta = -radius)
+    square([width, height]);
+}
+
 module PCBCase(bottom_thickness, wall_thickness, peg_height = 3, pin_diameter = 2.3) {
   pcb_padding = 2;
   pcb_x = 72 + pcb_padding;
@@ -139,20 +151,14 @@ module PCBCase(bottom_thickness, wall_thickness, peg_height = 3, pin_diameter = 
           square(size = [pcb_x - (radius * 2), pcb_y - (radius * 2)], center = true);
         }
 
-      // Wire hole
-      translate([((pcb_x - pcb_padding) / 2) - 35, ((pcb_y + wall_thickness) / 2), peg_height + 14])
-        color("blue")
-        linear_extrude(6)
-        // Add 1 so it looks nice in preview
-        square(size = [6, wall_thickness + 1], center = true);
+      // Wire hole (a slot open at the top)
+      wall_y = (pcb_y + wall_thickness) / 2;
+      wire_z = peg_height + 12;
+      WallCutout(((pcb_x - pcb_padding) / 2) - 35, wall_y, wall_thickness, wire_z, 6, pcb_thickness - wire_z + 2, 1);
 
-      // Opening for the power and USB plugs
-      translate([(pwr_x + usb_x) / 2, ((pcb_y + wall_thickness) / 2), peg_height - 1.5])
-        color("blue")
-        linear_extrude(usb_height + 1)
-        // Add 1 so it looks nice in preview
-        square(size = [usb_x - pwr_x + plug_width, wall_thickness + 1], center = true);
-
+      // Openings for the power and USB plugs, and the mini HDMI plug
+      WallCutout((pwr_x + usb_x) / 2, wall_y, wall_thickness, peg_height - 1.5, usb_x - pwr_x + plug_width, usb_height + 1, 1.5);
+      WallCutout(hdmi_x, wall_y, wall_thickness, peg_height - 1.5, hdmi_plug_width, usb_height + 1, 1.5);
     }
 
     Pegs(peg_height, pin_diameter);
