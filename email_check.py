@@ -39,9 +39,13 @@ def load_config(path):
 
 
 def matches(message, match):
-    """True if every non-empty match value is in the header (case-insensitive)."""
-    return all(str(value).lower() in str(message.get(header, '')).lower()
-               for header, value in match.items() if value)
+    """True if each header contains its match value, or any value in a list (case-insensitive; blank matches all)."""
+    for header, values in match.items():
+        values = [str(v).lower() for v in (values if isinstance(values, list) else [values]) if v]
+        text = str(message.get(header, '')).lower()
+        if values and not any(value in text for value in values):
+            return False
+    return True
 
 
 def ding(settings):

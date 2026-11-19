@@ -9,10 +9,12 @@ email:
   password: your_password
   folder: INBOX
 
-# Ding for unread emails whose From and Subject contain this text.
-# Case-insensitive; blank matches anything.
+# Ding for unread emails whose From and Subject contain this text, or any
+# item in a list. Case-insensitive; blank matches anything.
 match:
-  from: donations@example.com
+  from:
+    - donations@example.com
+    - receipts@example.org
   subject: ''
 
 # What to do for each matching email.
