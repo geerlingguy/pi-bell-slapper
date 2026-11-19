@@ -27,35 +27,27 @@ hdmi_x = pi_x0 + 65 - 12.4;
 plug_width = 12;  // Micro USB plug overmold, plus clearance.
 hdmi_plug_width = 16;
 
-// Blocks around the Pi's edges, so plugging in pushes the board against the case instead of the pegs.
-module PiStops(inner_x, inner_y, radius, peg_height, clearance = 0.25) {
+// Fills the floor around the Pi, so plugging in pushes the board against the case instead of the pegs, and
+// there are no pockets to collect dust. Plug channels drop to the wall opening's sill (sill_z).
+module PiStops(inner_x, inner_y, radius, peg_height, sill_z, clearance = 0.25) {
   h = peg_height + 1;  // Overlaps the bottom 1 mm of the Pi's PCB edge.
-  port_gaps = [
-    [pi_x0, pwr_x - plug_width / 2],
-    [usb_x + plug_width / 2, hdmi_x - hdmi_plug_width / 2],
-    [hdmi_x + hdmi_plug_width / 2, pi_x1],
+  plug_channels = [
+    [pwr_x - plug_width / 2, usb_x + plug_width / 2],
+    [hdmi_x - hdmi_plug_width / 2, hdmi_x + hdmi_plug_width / 2],
   ];
 
-  intersection() {
-    union() {
-      // GPIO side
-      translate([pi_x0, -inner_y / 2, 0])
-        cube([pi_x1 - pi_x0, (inner_y / 2) + pi_y0 - clearance, h]);
-      // Port side, between the plugs
-      for (gap = port_gaps)
-        translate([gap[0], pi_y1 + clearance, 0])
-          cube([gap[1] - gap[0], (inner_y / 2) - pi_y1 - clearance, h]);
-      // Short ends
-      translate([-inner_x / 2, pi_y0, 0])
-        cube([(inner_x / 2) + pi_x0 - clearance, pi_y1 - pi_y0, h]);
-      translate([pi_x1 + clearance, pi_y0, 0])
-        cube([(inner_x / 2) - pi_x1 - clearance, pi_y1 - pi_y0, h]);
-    }
+  difference() {
     linear_extrude(h)
       minkowski() {
         circle(r = radius);
         square(size = [inner_x - (radius * 2), inner_y - (radius * 2)], center = true);
       }
+    // The Pi (the space under it stays open for header solder joints)
+    translate([pi_x0 - clearance, pi_y0 - clearance, -1])
+      cube([pi_x1 - pi_x0 + clearance * 2, pi_y1 - pi_y0 + clearance * 2, h + 2]);
+    for (channel = plug_channels)
+      translate([channel[0], pi_y1, sill_z])
+        cube([channel[1] - channel[0], inner_y / 2, h]);
   }
 }
 
@@ -184,7 +176,7 @@ module PCBCase(bottom_thickness, wall_thickness, peg_height = 3, pin_diameter = 
     }
 
     Pegs(peg_height, pin_diameter);
-    PiStops(pcb_x, pcb_y, radius, peg_height);
+    PiStops(pcb_x, pcb_y, radius, peg_height, peg_height - 1.5);
   }
 }
 

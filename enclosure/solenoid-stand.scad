@@ -40,15 +40,14 @@ module SolenoidStand(z, bottom_shift, ridge_thickness, outer_radius) {
         center_square_points(top_x, top_y, solenoid_mounting_z),
         post_points);
 
-    echo(TrapezoidPoints);
-
+    // The right, back, and left sides aren't flat, so they're split into triangles.
     CubeFaces = [
       [0,1,2,3],  // bottom
       [4,5,1,0],  // front
       [7,6,5,4],  // top
-      [5,6,8,2,1],  // right
-      [6,7,9,3,2,8],  // back
-      [7,4,0,3,9],   // left
+      [5,6,8], [5,8,2], [5,2,1],  // right
+      [6,7,9], [6,9,8], [9,3,2], [9,2,8],  // back
+      [4,0,3], [4,3,9], [4,9,7],  // left
     ];
 
     polyhedron(TrapezoidPoints, CubeFaces, convexity = 10);
