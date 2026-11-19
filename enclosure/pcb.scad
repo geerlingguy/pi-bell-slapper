@@ -117,11 +117,6 @@ module PCBLid(top_thickness, wall_thickness, peg_height = 3, pi_pcb_thickness = 
         linear_extrude(1)
         square(size = [5, 2], center = true);
     }
-
-    mirror([1,0,0])
-        translate([0,0,-.001])
-            linear_extrude(1)
-                text("Clarence 2.0", halign = "center", valign = "center", size = 8);
   }
 
   // Lid's outer rim sits on the case walls; posts reach down to the top of the Pi's PCB.
