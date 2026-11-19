@@ -59,7 +59,25 @@ module PiStops(inner_x, inner_y, radius, peg_height, clearance = 0.25) {
   }
 }
 
-module PCBLid(top_thickness, wall_thickness) {
+// Posts that press the Pi down around its two mounting holes at the camera connector end, which the perfboard doesn't cover.
+module PiHoldDowns(length, diameter = 4.5) {
+  $fn = 60;
+  // The lid is flipped over when installed, so case x is mirrored.
+  for (y = [pi_y0 + 3.5, pi_y1 - 3.5]) {
+    translate([-(pi_x0 + 3.5), y, 0])
+      difference() {
+        union() {
+          cylinder(d = diameter, h = length);
+          cylinder(d1 = diameter + 3, d2 = diameter, h = 2);  // Fillet at the lid
+        }
+        // Clearance for the locating pin's tip
+        translate([0, 0, length - 1])
+          cylinder(d = 3, h = 1.1);
+      }
+  }
+}
+
+module PCBLid(top_thickness, wall_thickness, peg_height = 3, pi_pcb_thickness = 1.5) {
   pcb_padding = 2;
   pcb_x = 72 + pcb_padding;
   pcb_y = 50 + pcb_padding;
@@ -109,6 +127,10 @@ module PCBLid(top_thickness, wall_thickness) {
             linear_extrude(1)
                 text("Clarence 2.0", halign = "center", valign = "center", size = 8);
   }
+
+  // Lid's outer rim sits on the case walls; posts reach down to the top of the Pi's PCB.
+  translate([0, 0, top_thickness])
+    PiHoldDowns(lid_height + pcb_thickness - peg_height - pi_pcb_thickness);
 }
 
 // Rounded rectangular hole through a wall centered at y, from height z up.
