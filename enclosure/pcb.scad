@@ -26,9 +26,10 @@ usb_x = pi_x0 + 65 - 41.4;
 hdmi_x = pi_x0 + 65 - 12.4;
 plug_width = 12;  // Micro USB plug overmold, plus clearance.
 hdmi_plug_width = 16;
+sd_width = 18;  // Channel for the microSD card, centered on the Pi's end.
 
 // Fills the floor around the Pi, so plugging in pushes the board against the case instead of the pegs, and
-// there are no pockets to collect dust. Plug channels drop to the wall opening's sill (sill_z).
+// there are no pockets to collect dust. Plug and microSD channels drop to the wall opening's sill (sill_z).
 module PiStops(inner_x, inner_y, radius, peg_height, sill_z, clearance = 0.25) {
   h = peg_height + 1;  // Overlaps the bottom 1 mm of the Pi's PCB edge.
   plug_channels = [
@@ -48,6 +49,9 @@ module PiStops(inner_x, inner_y, radius, peg_height, sill_z, clearance = 0.25) {
     for (channel = plug_channels)
       translate([channel[0], pi_y1, sill_z])
         cube([channel[1] - channel[0], inner_y / 2, h]);
+    // microSD card, which sticks out past the Pi's end
+    translate([pi_x1, (pi_y0 + pi_y1) / 2 - sd_width / 2, sill_z])
+      cube([inner_x / 2, sd_width, h]);
   }
 }
 
