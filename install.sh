@@ -49,22 +49,29 @@ install -m 644 ding.wav "$APP_DIR/"
 install -m 644 web/* "$APP_DIR/web/"
 
 # Choose the default audio output, preferring USB; ask if there's more than one.
-mapfile -t cards < <(sed -n 's/^ *[0-9]* \[\([^ ]*\) *\]: \(.*\)$/\1|\2/p' /proc/asound/cards 2>/dev/null)
+cards=()
+for dir in /proc/asound/card[0-9]*; do
+  [ -f "$dir/id" ] || continue
+  label=$(<"$dir/id")
+  [ -e "$dir/usbid" ] && label="$label (USB)"
+  cards+=("$label")
+done
 if [ ${#cards[@]} -gt 0 ]; then
   choice=0
   for i in "${!cards[@]}"; do
-    if [[ ${cards[$i]} == *"|USB-Audio"* ]]; then choice=$i; break; fi
+    if [[ ${cards[$i]} == *" (USB)" ]]; then choice=$i; break; fi
   done
   if [ ${#cards[@]} -gt 1 ] && [ -t 0 ] && [ "$DEFAULTS" = false ]; then
     echo "Audio outputs:"
-    for i in "${!cards[@]}"; do echo "  $((i + 1))) ${cards[$i]#*|}"; done
+    for i in "${!cards[@]}"; do echo "  $((i + 1))) ${cards[$i]}"; done
     read -rp "Play sounds through which output? [$((choice + 1))]: " answer
     if [[ $answer =~ ^[0-9]+$ ]] && [ "$answer" -ge 1 ] && [ "$answer" -le ${#cards[@]} ]; then
       choice=$((answer - 1))
     fi
   fi
-  card=${cards[$choice]%%|*}
-  echo "Using audio output: ${cards[$choice]#*|}"
+  card=${cards[$choice]% (USB)}
+  [ -e "/proc/asound/$card" ] || die "sound card '$card' not found."
+  echo "Using audio output: ${cards[$choice]}"
 
   if [ -f /etc/asound.conf ] && ! grep -q 'pi-bell-slapper' /etc/asound.conf; then
     cp /etc/asound.conf "/etc/asound-backup-$(date +%F).conf"
