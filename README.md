@@ -35,8 +35,6 @@ The bell is hit by a solenoid, specifically the [uxcell 4.5V mini Push-Pull Sole
 
 The Pi tells the solenoid to trigger, and a little circuit I built as a hacked-together Pi HAT fires off a short pulse of energy to hit the side of the bell directly.
 
-> In 2020, the original "Mark I" version of the bell was slapped quite differently, using a servo. Read the [Mark I README](README-Mark-I.md) for more information about _that_ version of the bell.
-
 ## What kind of bell does it slap?
 
 I'm currently slapping a boring old call bell. [This call bell](https://amzn.to/3iCUL5F). But any bell you could mount to be slapped would work.
