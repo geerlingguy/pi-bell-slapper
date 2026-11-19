@@ -38,7 +38,6 @@ module BellAndSolenoidStand(pcb = true) {
     center_of_bell_ridge_z = to_bell_z + (bell_ridge_z / 2);
     solenoid_mounting_z = center_of_bell_ridge_z - (solenoid_z / 2);
 
-    echo(outer_radius);
     SolenoidStand(solenoid_mounting_z - solenoid_mount_wall_thickness, overhang + solenoid_mount_wall_thickness, bottom_ridge_x, outer_radius);
     translate([0, 0, solenoid_mounting_z - solenoid_mount_wall_thickness])
       SolenoidMount();
