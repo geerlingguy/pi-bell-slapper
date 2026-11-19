@@ -14,6 +14,51 @@ module Pegs(height, pin_diameter) {
   }
 }
 
+// Pi Zero outline in case coordinates, from the peg (mounting hole) positions.
+pi_x0 = -1.05 * (58 / 2) - 3.5;
+pi_x1 = 0.95 * (58 / 2) + 3.5;
+pi_y0 = -0.8 * (23 / 2) - 3.5;
+pi_y1 = 1.2 * (23 / 2) + 3.5;
+
+// Port centers along the port edge (+y), measured from the CSI end (pi_x0).
+pwr_x = pi_x0 + 65 - 54;
+usb_x = pi_x0 + 65 - 41.4;
+hdmi_x = pi_x0 + 65 - 12.4;
+plug_width = 12;  // Micro USB plug overmold, plus clearance.
+hdmi_plug_width = 16;
+
+// Blocks around the Pi's edges, so plugging in pushes the board against the case instead of the pegs.
+module PiStops(inner_x, inner_y, radius, peg_height, clearance = 0.25) {
+  h = peg_height + 1;  // Overlaps the bottom 1 mm of the Pi's PCB edge.
+  port_gaps = [
+    [pi_x0, pwr_x - plug_width / 2],
+    [usb_x + plug_width / 2, hdmi_x - hdmi_plug_width / 2],
+    [hdmi_x + hdmi_plug_width / 2, pi_x1],
+  ];
+
+  intersection() {
+    union() {
+      // GPIO side
+      translate([pi_x0, -inner_y / 2, 0])
+        cube([pi_x1 - pi_x0, (inner_y / 2) + pi_y0 - clearance, h]);
+      // Port side, between the plugs
+      for (gap = port_gaps)
+        translate([gap[0], pi_y1 + clearance, 0])
+          cube([gap[1] - gap[0], (inner_y / 2) - pi_y1 - clearance, h]);
+      // Short ends
+      translate([-inner_x / 2, pi_y0, 0])
+        cube([(inner_x / 2) + pi_x0 - clearance, pi_y1 - pi_y0, h]);
+      translate([pi_x1 + clearance, pi_y0, 0])
+        cube([(inner_x / 2) - pi_x1 - clearance, pi_y1 - pi_y0, h]);
+    }
+    linear_extrude(h)
+      minkowski() {
+        circle(r = radius);
+        square(size = [inner_x - (radius * 2), inner_y - (radius * 2)], center = true);
+      }
+  }
+}
+
 module PCBLid(top_thickness, wall_thickness) {
   pcb_padding = 2;
   pcb_x = 72 + pcb_padding;
@@ -101,16 +146,17 @@ module PCBCase(bottom_thickness, wall_thickness, peg_height = 3, pin_diameter = 
         // Add 1 so it looks nice in preview
         square(size = [6, wall_thickness + 1], center = true);
 
-      // USB hole
-      translate([((pcb_x - pcb_padding) / 2) - 61, ((pcb_y + wall_thickness) / 2), peg_height + 1])
+      // Opening for the power and USB plugs
+      translate([(pwr_x + usb_x) / 2, ((pcb_y + wall_thickness) / 2), peg_height - 1.5])
         color("blue")
-        linear_extrude(usb_height)
+        linear_extrude(usb_height + 1)
         // Add 1 so it looks nice in preview
-        square(size = [usb_width, wall_thickness + 1], center = true);
+        square(size = [usb_x - pwr_x + plug_width, wall_thickness + 1], center = true);
 
     }
 
     Pegs(peg_height, pin_diameter);
+    PiStops(pcb_x, pcb_y, radius, peg_height);
   }
 }
 
