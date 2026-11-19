@@ -6,7 +6,7 @@ The enclosure design is based on [@tenderlove's Analog Terminal Bell](https://gi
 
 ## Printing
 
-Print `case.stl` (bell base, solenoid stand, and Pi case as one part) and `lid.stl`. The lid prints top-down, with the "Clarence 2.0" text on the bed.
+Print `case.stl` (bell base, solenoid stand, and Pi case as one part) and `lid.stl`. The lid prints top-down, so its plain top is on the bed.
 
 ## Generating STLs
 
