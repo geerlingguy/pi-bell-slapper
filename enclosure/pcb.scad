@@ -107,7 +107,7 @@ module PCBLid(top_thickness, wall_thickness) {
     mirror([1,0,0])
         translate([0,0,-.001])
             linear_extrude(1)
-                text("Clarence 2.0", font = f, halign = "center", valign = "center", size = 8);
+                text("Clarence 2.0", halign = "center", valign = "center", size = 8);
   }
 }
 
