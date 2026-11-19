@@ -1,0 +1,43 @@
+---
+name: STLs
+'on':
+  push:
+    branches:
+      - master
+    paths:
+      - 'enclosure/**.scad'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+
+  render:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install OpenSCAD
+        run: sudo apt-get update -q && sudo apt-get install -y -q openscad
+
+      - name: Render STLs
+        working-directory: enclosure
+        run: |
+          openscad --export-format binstl -o case.stl case.scad
+          openscad --export-format binstl -o lid.stl lid.scad
+
+      # Pushes with GITHUB_TOKEN don't trigger workflows, so this can't loop.
+      - name: Commit STLs
+        env:
+          EMAIL: 41898282+github-actions[bot]@users.noreply.github.com
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email "$EMAIL"
+          git add enclosure/*.stl
+          if ! git diff --cached --quiet; then
+            git commit -m 'Render STLs from OpenSCAD files.'
+            git push
+          fi

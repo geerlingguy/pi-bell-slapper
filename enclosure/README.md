@@ -10,7 +10,9 @@ Print `case.stl` (bell base, solenoid stand, and Pi case as one part) and `lid.s
 
 ## Generating STLs
 
-Install OpenSCAD (`brew install openscad` on macOS, `sudo apt install openscad` on Debian/Ubuntu), then from this folder:
+When a `.scad` file changes on `master`, the [STLs workflow](../.github/workflows/stl.yml) renders `case.stl` and `lid.stl` and commits them, so PRs don't need to include STLs. You can also run it by hand from the Actions tab.
+
+To render them locally, install OpenSCAD (`brew install openscad` on macOS, `sudo apt install openscad` on Debian/Ubuntu), then from this folder:
 
 ```
 openscad --export-format binstl -o case.stl case.scad
