@@ -132,6 +132,21 @@ curl -X PUT http://bell-slapper.local/api/settings -d '{"interval": 2.5}'
 curl -X POST --data-binary @tada.mp3 'http://bell-slapper.local/api/sounds?name=tada.mp3'
 ```
 
+### Logs
+
+The service logs each ding (count, interval, whether sound played, and whether it came from the web UI or an API call), plus sound uploads and deletes, to the systemd journal:
+
+```
+$ journalctl -u bell-slapper -o short-iso
+2026-11-20T10:15:02-0600 clarence python3[909]: Ding: count=2 interval=1.00 sound=1 source=web client=10.0.2.17
+2026-11-20T10:16:40-0600 clarence python3[909]: Ding: count=1 interval=1.00 sound=1 source=api client=127.0.0.1
+2026-11-20T10:20:11-0600 clarence python3[909]: Sound uploaded: name=tada source=web client=10.0.2.17
+```
+
+`source=web` means the request came from a browser (which sends an `Origin` header); everything else, like `curl` or the email checker (`client=127.0.0.1`), is `source=api`. Individual web requests aren't logged.
+
+journald buffers log entries and only syncs them to disk every few minutes (`SyncIntervalSec`, 5 minutes by default), which keeps writes to the microSD card down. Use `journalctl -u bell-slapper -f` to follow it live.
+
 ### Sound output
 
 Sounds play through the default ALSA device, which `install.sh` sets in `/etc/asound.conf`. To change the output, plug in the sound card and run `sudo ./install.sh` again.

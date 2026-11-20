@@ -4,6 +4,7 @@
 import argparse
 import gzip
 import json
+import logging
 import queue
 import re
 import shutil
@@ -17,6 +18,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
 ROOT = Path(__file__).resolve().parent
+log = logging.getLogger('bell-slapper')
 
 MIN_INTERVAL = 1.0  # Hard rate limit: never more than one ding per second.
 MAX_INTERVAL = 10.0
@@ -70,12 +72,12 @@ class Bell:
     def pending(self):
         return self.queue.unfinished_tasks
 
-    def start(self, count, interval, sound):
+    def start(self, count, interval, sound, source):
         """Queue a ding sequence. Returns its queue position, or 0 if the queue is full."""
         with self.lock:
             if self.pending() >= MAX_QUEUE:
                 return 0
-            self.queue.put((count, interval, sound))
+            self.queue.put((count, interval, sound, source))
             return self.pending()
 
     def _worker(self):
@@ -84,11 +86,12 @@ class Bell:
             try:
                 self._run(*job)
             except Exception as e:  # pylint: disable=broad-exception-caught
-                print(f'Ding failed: {e}', flush=True)
+                log.error('Ding failed: %s', e)
             finally:
                 self.queue.task_done()
 
-    def _run(self, count, interval, sound):
+    def _run(self, count, interval, sound, source):
+        log.info('Ding: count=%d interval=%.2f sound=%d %s', count, interval, bool(sound), source)
         for i in range(count):
             gap = max(MIN_INTERVAL, interval) if i else MIN_INTERVAL
             time.sleep(max(0.0, self.last + gap - time.monotonic()))
@@ -104,7 +107,7 @@ class Bell:
             time.sleep(PULSE)
             self.gpio.output(self.pin, self.gpio.LOW)
         else:
-            print('DING (dry run)', flush=True)
+            log.info('DING (dry run)')
         self.last = time.monotonic()
 
 
@@ -315,7 +318,7 @@ class Handler(BaseHTTPRequestHandler):
                 sound = app['sounds'].path(params.get('sound_name', settings['sound']))
                 if not sound:
                     raise ApiError(400, 'No sound available. Upload one first.')
-            position = app['bell'].start(int(count), interval, sound)
+            position = app['bell'].start(int(count), interval, sound, self.source())
             if not position:
                 raise ApiError(429, f'The ding queue is full ({MAX_QUEUE}). Try again in a moment.')
             return self.send_json({'count': int(count), 'interval': interval, 'sound': bool(sound),
@@ -325,7 +328,9 @@ class Handler(BaseHTTPRequestHandler):
         if method == 'POST' and path == '/api/sounds':
             return self.upload()
         if method == 'DELETE' and path.startswith('/api/sounds/'):
-            app['sounds'].delete(path[len('/api/sounds/'):])
+            name = path[len('/api/sounds/'):]
+            app['sounds'].delete(name)
+            log.info('Sound deleted: name=%s %s', name, self.source())
             return self.send_json({'sounds': app['sounds'].list(), 'settings': app['settings'].get()})
         raise ApiError(404, 'Not found.')
 
@@ -342,7 +347,15 @@ class Handler(BaseHTTPRequestHandler):
             name = sounds.add(self.query.get('name', ''), self.rfile.read(length))
         finally:
             sounds.upload_lock.release()
+        log.info('Sound uploaded: name=%s %s', name, self.source())
         return self.send_json({'name': name, 'sounds': sounds.list()}, 201)
+
+    def source(self):
+        """Where a request came from: browsers send an Origin header with POSTs, API clients usually don't."""
+        return f"source={'web' if self.headers.get('Origin') else 'api'} client={self.client_address[0]}"
+
+    def log_request(self, code='-', size='-'):
+        pass  # Skip per-request access logs to save SD card writes; events are logged instead.
 
     def content_length(self):
         try:
@@ -401,6 +414,7 @@ def main():
     parser.add_argument('--data-dir', type=Path, default=ROOT / 'data', help='Settings and uploaded sounds')
     parser.add_argument('--dry-run', action='store_true', help='Print dings instead of using GPIO')
     args = parser.parse_args()
+    logging.basicConfig(level=logging.INFO, format='%(message)s')  # journald adds timestamps
 
     args.data_dir.mkdir(parents=True, exist_ok=True)
     sounds = Sounds(args.data_dir)
@@ -412,7 +426,7 @@ def main():
                    'settings': Settings(args.data_dir, sounds), 'static': static}
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
-    print(f'Bell Slapper listening on http://{args.host}:{args.port}', flush=True)
+    log.info('Bell Slapper listening on http://%s:%d', args.host, args.port)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
