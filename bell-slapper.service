@@ -5,7 +5,7 @@ After=network.target sound.target
 [Service]
 ExecStart=/usr/bin/python3 /opt/bell-slapper/server.py --data-dir /var/lib/bell-slapper
 DynamicUser=yes
-SupplementaryGroups=gpio audio
+SupplementaryGroups=gpio audio systemd-journal
 StateDirectory=bell-slapper
 WorkingDirectory=/var/lib/bell-slapper
 AmbientCapabilities=CAP_NET_BIND_SERVICE

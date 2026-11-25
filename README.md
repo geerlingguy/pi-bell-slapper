@@ -119,6 +119,7 @@ The bell will never ding more than once per second. Ding requests are queued and
 | Request | Description |
 | --- | --- |
 | `GET /api/status` | Current settings, available sounds, volume, and number of queued ding requests. |
+| `GET /api/stats` | Dings per hour for the last 24 hours, as `[hour start (Unix time), dings]` pairs (shown as a chart in the web UI). |
 | `POST /api/ding` | Ding the bell. Optional parameters: `count` (1-10), `interval` (1-10 seconds), `sound` (`true` to play the selected sound after each ding), `sound_name`. |
 | `PUT /api/settings` | Update `interval`, `sound`, and/or `volume` (0-100). |
 | `POST /api/sounds?name=file.mp3` | Upload a sound (raw file as the request body). |
@@ -144,6 +145,8 @@ $ journalctl -u bell-slapper -o short-iso
 ```
 
 `source=web` means the request came from a browser (which sends an `Origin` header); everything else, like `curl` or the email checker (`client=127.0.0.1`), is `source=api`. Individual web requests aren't logged.
+
+The web UI's "Dings per Hour" chart counts dings in memory as they happen; when the service starts, it reads the last 24 hours of `Ding:` lines from the journal once, so the chart survives restarts. (The service runs in the `systemd-journal` group so it can read them.)
 
 journald buffers log entries and only syncs them to disk every few minutes (`SyncIntervalSec`, 5 minutes by default), which keeps writes to the microSD card down. Use `journalctl -u bell-slapper -f` to follow it live.
 

@@ -67,6 +67,29 @@ function render(data) {
   }
 }
 
+// Bar chart of dings per hour for the last 24 hours, from /api/stats.
+async function refreshChart() {
+  const { hourly } = await api('GET', '/api/stats').catch(() => ({ hourly: [] }));
+  const max = Math.max(1, ...hourly.map(([, n]) => n));
+  const hour = (t) => new Date(t * 1000).toLocaleTimeString([], { hour: 'numeric' });
+  const chart = $('chart');
+  chart.style.height = '100px';
+  chart.replaceChildren(...hourly.map(([t, n]) => {
+    const bar = document.createElement('div');
+    bar.className = 'flex-fill bg-primary rounded-top';
+    bar.style.height = `${(n / max) * 100}%`;
+    bar.title = `${hour(t)}: ${n} ding${n === 1 ? '' : 's'}`;
+    return bar;
+  }));
+  const total = hourly.reduce((sum, [, n]) => sum + n, 0);
+  $('chart-total').textContent = `${total} in 24 hours`;
+  $('chart-labels').replaceChildren(...[0, 6, 12, 18, 23].filter((i) => hourly[i]).map((i) => {
+    const label = document.createElement('span');
+    label.textContent = i === 23 ? 'Now' : hour(hourly[i][0]);
+    return label;
+  }));
+}
+
 async function ding(sound) {
   const count = Number(document.querySelector('[name=count]:checked').value);
   try {
@@ -75,6 +98,7 @@ async function ding(sound) {
     show(position > 1
       ? `Queued ${count} ding${count > 1 ? 's' : ''}${extra} (#${position} in line).`
       : `Dinging ${count > 1 ? `${count} times` : 'once'}${extra}!`);
+    setTimeout(refreshChart, 2000);
   } catch (e) {
     show(e.message, 'warning');
   }
@@ -142,3 +166,5 @@ $('upload').onclick = async () => {
 };
 
 api('GET', '/api/status').then(render).catch((e) => show(e.message, 'danger'));
+refreshChart();
+setInterval(refreshChart, 60000);
