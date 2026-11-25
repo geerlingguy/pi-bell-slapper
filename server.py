@@ -54,9 +54,42 @@ class ApiError(Exception):
         self.status = status
 
 
+class DingStats:
+    """Dings per hour for the last 24 hours: counted in memory, seeded once from the journal at startup."""
+
+    def __init__(self):
+        self.lock = threading.Lock()
+        self.hours = {}
+        threading.Thread(target=self._load_journal, daemon=True).start()
+
+    def add(self, count=1, when=None):
+        hour = int((when or time.time()) // 3600) * 3600
+        with self.lock:
+            self.hours[hour] = self.hours.get(hour, 0) + count
+
+    def hourly(self):
+        """[[hour start (Unix time), dings], ...] for the last 24 hours, oldest first."""
+        now = int(time.time() // 3600) * 3600
+        start = now - 23 * 3600
+        with self.lock:
+            self.hours = {h: c for h, c in self.hours.items() if h >= start}
+            return [[h, self.hours.get(h, 0)] for h in range(start, now + 1, 3600)]
+
+    def _load_journal(self):
+        try:
+            out = subprocess.run(['journalctl', '-u', 'bell-slapper', '--since=-24h', '-o', 'short-unix',
+                                  '--no-pager', '-q'], capture_output=True, text=True, timeout=60, check=True).stdout
+        except (OSError, subprocess.SubprocessError) as e:
+            log.warning('Could not read past dings from the journal: %s', e)
+            return
+        for match in re.finditer(r'^(\d+)\.\d+ .*?: Ding: count=(\d+)', out, re.MULTILINE):
+            self.add(int(match[2]), int(match[1]))
+
+
 class Bell:
-    def __init__(self, pin, dry_run):
+    def __init__(self, pin, dry_run, stats):
         self.pin = pin
+        self.stats = stats
         self.lock = threading.Lock()
         self.queue = queue.Queue()
         self.last = 0.0
@@ -109,6 +142,7 @@ class Bell:
         else:
             log.info('DING (dry run)')
         self.last = time.monotonic()
+        self.stats.add()
 
 
 class Sounds:
@@ -295,6 +329,8 @@ class Handler(BaseHTTPRequestHandler):
         if self.url_path == '/api/status':
             return self.send_json({'queued': app['bell'].pending(), 'settings': app['settings'].get(),
                                    'sounds': app['sounds'].list(), 'volume': get_volume()})
+        if self.url_path == '/api/stats':
+            return self.send_json({'hourly': app['stats'].hourly()})
         if self.url_path in STATIC:
             return self.send_static(self.url_path)
         raise ApiError(404, 'Not found.')
@@ -422,7 +458,8 @@ def main():
     for path, (name, content_type, cache) in STATIC.items():
         body = (ROOT / 'web' / name).read_bytes()
         static[path] = (body, gzip.compress(body, compresslevel=6) if len(body) > 1024 else None, content_type, cache)
-    Handler.app = {'bell': Bell(args.pin, args.dry_run), 'sounds': sounds,
+    stats = DingStats()
+    Handler.app = {'bell': Bell(args.pin, args.dry_run, stats), 'stats': stats, 'sounds': sounds,
                    'settings': Settings(args.data_dir, sounds), 'static': static}
 
     server = ThreadingHTTPServer((args.host, args.port), Handler)
