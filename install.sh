@@ -56,6 +56,18 @@ for dir in /proc/asound/card[0-9]*; do
   [ -e "$dir/usbid" ] && label="$label (USB)"
   cards+=("$label")
 done
+# Without a USB card, only use another output (like HDMI) if confirmed; otherwise keep the current setting.
+if [ ${#cards[@]} -gt 0 ] && [[ "${cards[*]}" != *" (USB)"* ]]; then
+  answer=n
+  if [ -t 0 ] && [ "$DEFAULTS" = false ]; then
+    read -rp "No USB sound card found. Use ${cards[*]} instead? [y/N]: " answer
+  fi
+  if [[ ! $answer =~ ^[Yy] ]]; then
+    echo "Warning: no USB sound card found; leaving the audio output unchanged. Plug it in and run this again." >&2
+    cards=()
+    skip_audio=true
+  fi
+fi
 if [ ${#cards[@]} -gt 0 ]; then
   choice=0
   for i in "${!cards[@]}"; do
@@ -88,7 +100,7 @@ ctl.!default {
         card $card
 }
 EOF
-else
+elif [ -z "${skip_audio:-}" ]; then
   echo "Warning: no sound cards found; sounds won't play." >&2
 fi
 
