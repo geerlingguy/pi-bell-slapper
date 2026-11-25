@@ -75,12 +75,18 @@ async function refreshChart() {
   const chart = $('chart');
   chart.style.height = '100px';
   chart.replaceChildren(...hourly.map(([t, n]) => {
+    // Full-height column, so empty hours can be hovered or tapped too.
+    const column = document.createElement('div');
+    column.className = 'flex-fill h-100 d-flex align-items-end';
+    column.dataset.count = n;
+    column.setAttribute('aria-label', `${hour(t)}: ${n} ding${n === 1 ? '' : 's'}`);
     const bar = document.createElement('div');
-    bar.className = 'flex-fill bg-primary rounded-top';
+    bar.className = 'w-100 bg-primary rounded-top';
     bar.style.height = `${(n / max) * 100}%`;
-    bar.title = `${hour(t)}: ${n} ding${n === 1 ? '' : 's'}`;
-    return bar;
+    column.append(bar);
+    return column;
   }));
+  hideChartValue();
   const total = hourly.reduce((sum, [, n]) => sum + n, 0);
   $('chart-total').textContent = `${total} in the last 24 hours`;
   $('chart-labels').replaceChildren(...[0, 6, 12, 18, 23].filter((i) => hourly[i]).map((i) => {
@@ -88,6 +94,19 @@ async function refreshChart() {
     label.textContent = i === 23 ? 'Now' : hour(hourly[i][0]);
     return label;
   }));
+}
+
+// Show a column's ding count just above its bar.
+function showChartValue(column) {
+  const value = $('chart-value');
+  value.textContent = column.dataset.count;
+  value.style.left = `${column.offsetLeft + column.offsetWidth / 2}px`;
+  value.style.bottom = `${column.firstChild.offsetHeight + 2}px`;
+  value.classList.remove('d-none');
+}
+
+function hideChartValue() {
+  $('chart-value').classList.add('d-none');
 }
 
 async function ding(sound) {
@@ -126,6 +145,20 @@ $('config-toggle').onclick = () => {
   $('config-toggle').classList.toggle('collapsed', !open);
   $('config-toggle').setAttribute('aria-expanded', open);
 };
+$('chart').onpointerover = (e) => {
+  const column = e.target.closest('[data-count]');
+  if (column && e.pointerType === 'mouse') showChartValue(column);
+};
+$('chart').onpointerleave = (e) => {
+  if (e.pointerType === 'mouse') hideChartValue();
+};
+// Tap (or click) a bar to show its count; tap anywhere else to hide it.
+document.addEventListener('click', (e) => {
+  const column = e.target.closest('#chart [data-count]');
+  if (column) showChartValue(column);
+  else hideChartValue();
+});
+
 $('ding').onclick = () => ding(false);
 $('ding-sound').onclick = () => ding(true);
 $('interval').onchange = () => save({ interval: $('interval').value });
