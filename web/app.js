@@ -82,7 +82,7 @@ async function refreshChart() {
     return bar;
   }));
   const total = hourly.reduce((sum, [, n]) => sum + n, 0);
-  $('chart-total').textContent = `${total} in 24 hours`;
+  $('chart-total').textContent = `${total} in the last 24 hours`;
   $('chart-labels').replaceChildren(...[0, 6, 12, 18, 23].filter((i) => hourly[i]).map((i) => {
     const label = document.createElement('span');
     label.textContent = i === 23 ? 'Now' : hour(hourly[i][0]);
