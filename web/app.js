@@ -168,3 +168,7 @@ $('upload').onclick = async () => {
 api('GET', '/api/status').then(render).catch((e) => show(e.message, 'danger'));
 refreshChart();
 setInterval(refreshChart, 60000);
+// Phones pause timers in background tabs, so refresh as soon as the page is visible again.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) refreshChart();
+});
