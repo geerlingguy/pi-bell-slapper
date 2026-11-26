@@ -112,6 +112,18 @@ Settings and uploaded sounds are stored in `/var/lib/bell-slapper`. Uploads must
 
 > To test without a Pi, run `./server.py --port 8080 --dry-run`.
 
+### Adding WiFi networks
+
+Raspberry Pi OS uses NetworkManager, which joins whichever saved network is in range. To add one:
+
+```
+sudo nmcli connection add type wifi con-name "office-wifi" ssid "OfficeSSID" \
+  wifi-sec.key-mgmt wpa-psk wifi-sec.psk "password" \
+  connection.autoconnect-priority 10
+```
+
+If more than one saved network is in range, the higher `autoconnect-priority` wins. For a hidden network, add `802-11-wireless.hidden yes`. The Pi Zero W only supports 2.4 GHz WiFi. List saved networks with `nmcli connection show`, and rename one with `sudo nmcli connection modify OLD connection.id NEW`.
+
 ### API
 
 The bell will never ding more than once per second. Ding requests are queued and run in order; once 10 are waiting (or running), new requests get a `429` response.
