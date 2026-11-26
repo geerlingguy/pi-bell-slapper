@@ -148,7 +148,7 @@ $ journalctl -u bell-slapper -o short-iso
 
 The web UI's "Dings per Hour" chart counts dings in memory as they happen; when the service starts, it reads the last 24 hours of `Ding:` lines from the journal once, so the chart survives restarts. (The service runs in the `systemd-journal` group so it can read them.)
 
-journald buffers log entries and only syncs them to disk every few minutes (`SyncIntervalSec`, 5 minutes by default), which keeps writes to the microSD card down. Use `journalctl -u bell-slapper -f` to follow it live.
+The install script sets the journal to persistent storage (`/etc/systemd/journald.conf.d/90-bell-slapper.conf`), so logs survive reboots; otherwise Raspberry Pi OS may keep them only in RAM. journald buffers log entries and only syncs them to disk every few minutes (`SyncIntervalSec`, 5 minutes by default), which keeps writes to the microSD card down. Use `journalctl -u bell-slapper -f` to follow it live.
 
 ### Sound output
 
