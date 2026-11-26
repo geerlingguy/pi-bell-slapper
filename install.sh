@@ -104,6 +104,15 @@ elif [ -z "${skip_audio:-}" ]; then
   echo "Warning: no sound cards found; sounds won't play." >&2
 fi
 
+# Keep the journal on disk, so ding logs (and the chart) survive reboots; journald still batches writes.
+journald_conf=/etc/systemd/journald.conf.d/90-bell-slapper.conf
+if [ "$(cat "$journald_conf" 2>/dev/null)" != $'[Journal]\nStorage=persistent' ]; then
+  echo "Enabling the persistent journal..."
+  install -d /etc/systemd/journald.conf.d
+  printf '[Journal]\nStorage=persistent\n' > "$journald_conf"
+  systemctl restart systemd-journald
+fi
+
 # Reloading systemd is slow on a Pi Zero, so only do it when a unit changed.
 # A new email unit gets enabled; an existing one that was disabled stays off.
 [ -f "/etc/systemd/system/$EMAIL_SERVICE" ] && email_new=false || email_new=true
